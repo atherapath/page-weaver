@@ -38,6 +38,18 @@ main{
     width:100%;
 }
 
+/* Intro uses the same card + text look but is full-width and slimmer */
+.intro{
+    width:100%;
+    padding:0.6rem 1.25rem; /* slimmer vertical padding */
+    margin:0 0 1rem 0;
+    background: rgba(29,185,84,0.03);
+    border: 2px solid rgba(29,185,84,0.12);
+    border-radius:8px;
+    font-size:0.98rem;
+    line-height:1.4;
+}
+
 /* Content area: image and text side-by-side */
 .content{
     display:flex;
@@ -96,6 +108,7 @@ footer{
 
 /* Responsive: stack sections under each other on small screens */
 @media (max-width: 768px){
+    .intro{padding:0.5rem 0.9rem}
     main{padding:1rem}
     .content{flex-direction:column}
     .card{width:100%}
