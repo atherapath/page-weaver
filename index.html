@@ -3,47 +3,81 @@
 <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width,initial-scale=1" />
-    <title>Green & Black Layout</title>
+    <title>Green & Black Layout — Shell</title>
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
-    <header>
-        Spencer Log — Green & Black Layout
+    <header class="site-header" role="banner" aria-label="Primary">
+        <div class="header-inner" style="display:flex;align-items:center;justify-content:space-between;gap:1rem;max-width:1100px;margin:0 auto;width:100%;">
+            <div class="logo" style="display:flex;align-items:center;gap:.5rem">
+                <!-- simple SVG logo -->
+                <svg width="36" height="36" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+                    <rect width="24" height="24" rx="4" fill="#1db954"></rect>
+                    <circle cx="12" cy="12" r="5" fill="#07110a"></circle>
+                </svg>
+                <strong style="color:var(--black)">Spencer Log</strong>
+            </div>
+
+            <nav aria-label="Primary navigation">
+                <button data-src="content.html" id="btn-content" style="background:transparent;border:1px solid rgba(255,255,255,0.06);color:var(--black);padding:.45rem .8rem;border-radius:6px;cursor:pointer">Content</button>
+                <!-- add more nav buttons (other content files) as needed -->
+            </nav>
+        </div>
     </header>
 
-    <main>
-        <section class="card text intro" aria-label="Opening paragraph">
-            <p>
-                Welcome — this short opening paragraph introduces the content below.
-                It's styled like the text card but sits above the two-column area and is more compact for a clean lead-in.
-            </p>
-        </section>
-
-        <div class="content">
-            <section class="card image-wrap" aria-label="Hero image">
-                <img src="https://picsum.photos/900/600" alt="Sample landscape" />
-            </section>
-
-            <section class="card text" aria-label="Description">
-                <h2>Side-by-side content</h2>
-                <p>
-                    This layout places an image and a text section side by side on wider screens and stacks them vertically on smaller screens using a CSS @media query. The design emphasizes green accents on a black background for a bold, high-contrast look.
-                </p>
-                <p>
-                    Resize the window to see the blocks change from a two-column layout to a single-column stack. The visual elements use subtle borders and gradients to keep the theme cohesive.
-                </p>
-            </section>
+    <main id="shell-main" style="flex:1 0 auto;padding:2rem;max-width:1100px;margin:0 auto;width:100%;">
+        <div id="page-content" aria-live="polite">
+            Loading content…
         </div>
-        <section class="card text closing" aria-label="Closing paragraph">
-            <p>
-                Goodbye — this closing paragraph introduces the content below.
-                It's styled like the text card but sits below the two-column area and is more compact for a clean lead-out.
-            </p>
-        </section>
     </main>
 
-    <footer>
+    <footer role="contentinfo" style="background:#07110a;color:var(--green);text-align:center;padding:.75rem 1rem;border-top:1px solid rgba(29,185,84,0.08);">
         © 2025 — Minimal Green & Black Template
     </footer>
+
+    <script>
+    // load content.html into #page-content by extracting its <main> if present
+    async function loadContent(path = 'content.html') {
+        const container = document.getElementById('page-content');
+        container.textContent = 'Loading content…';
+        try {
+            const res = await fetch(path);
+            if (!res.ok) throw new Error('Fetch failed: ' + res.status);
+            const text = await res.text();
+            const parser = new DOMParser();
+            const doc = parser.parseFromString(text, 'text/html');
+            // prefer the main element of the external file, otherwise use body
+            const injected = doc.querySelector('main') || doc.body;
+            container.innerHTML = injected ? injected.innerHTML : text;
+            // optionally run inline scripts from content.html (if any)
+            container.querySelectorAll('script').forEach(oldScript => {
+                const s = document.createElement('script');
+                if (oldScript.src) s.src = oldScript.src;
+                s.textContent = oldScript.textContent;
+                document.body.appendChild(s).remove();
+            });
+        } catch (err) {
+            // fetch may be blocked on file:// — fallback to iframe
+            console.warn('Fetch failed, falling back to iframe:', err);
+            container.innerHTML = '';
+            const iframe = document.createElement('iframe');
+            iframe.src = path;
+            iframe.title = 'Content';
+            iframe.style = 'width:100%;min-height:360px;border:0;border-radius:8px;overflow:hidden';
+            container.appendChild(iframe);
+        }
+    }
+
+    // initial load
+    loadContent('content.html');
+
+    // nav button behavior (loads other content files when added)
+    document.querySelectorAll('button[data-src]').forEach(btn => {
+        btn.addEventListener('click', () => {
+            const src = btn.getAttribute('data-src');
+            loadContent(src);
+        });
+    });
+    </script>
 </body>
 </html>
