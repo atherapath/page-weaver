@@ -9,133 +9,53 @@
 <body>
     <header class="site-header" role="banner" aria-label="Primary">
         <div class="header-inner">
-            <div class="logo" aria-label="Spencer Log">
-                <img src="assets/logo.jpg" alt="Spencer Log logo" width="128" height="128">
+            <div class="logo">
+                <img src="https://picsum.photos/seed/logo/96/96" alt="logo">
             </div>
 
-            <!-- center title pulled from content.html -->
-            <div id="site-title" class="site-title" aria-live="polite" aria-atomic="true"></div>
+            <div id="site-title" class="site-title">
+                Spencer Log — Green & Black Layout
+            </div>
 
-            <nav aria-label="Primary navigation">
-                <button data-src="content.html" id="btn-content" class="nav-btn">Content</button>
+            <nav aria-label="Primary actions">
+                <button class="nav-btn" type="button">Apply</button>
             </nav>
         </div>
     </header>
 
     <main id="shell-main">
-        <div id="page-content" aria-live="polite">
-            Loading content…
+        <section class="card text intro" aria-label="Opening paragraph">
+            <p>
+                Welcome — this short opening paragraph introduces the content below.
+                It's styled like the right-hand text card but sits above the two-column area and is more compact for a clean lead-in.
+            </p>
+        </section>
+
+        <div class="content" aria-live="polite">
+            <section class="card image-wrap" aria-label="Hero image">
+                <img src="https://picsum.photos/seed/green-theme/900/600" alt="Sample landscape" />
+            </section>
+
+            <section class="card text" aria-label="Description">
+                <h2>Side-by-side content</h2>
+                <p>
+                    This layout places an image and a text section side by side on wider screens and stacks them vertically on smaller screens using a CSS @media query. The design emphasizes green accents on a black background for a bold, high-contrast look.
+                </p>
+                <p>
+                    Resize the window to see the blocks change from a two-column layout to a single-column stack. The visual elements use subtle borders and gradients to keep the theme cohesive.
+                </p>
+            </section>
         </div>
+
+        <section class="card text closing" aria-label="Closing paragraph">
+            <p>
+                Goodbye — this short closing paragraph wraps up the content above. It reuses the same card + text look so spacing and styling match the intro.
+            </p>
+        </section>
     </main>
 
     <footer role="contentinfo">
         © 2025 — Minimal Green & Black Template
     </footer>
-
-    <script>
-    // load content.html into #page-content and align the right-hand nav button
-    async function loadContent(path = 'content.html') {
-        const container = document.getElementById('page-content');
-        const siteTitleEl = document.getElementById('site-title');
-        const headerInner = document.querySelector('.header-inner');
-        const nav = headerInner.querySelector('nav');
-        container.textContent = 'Loading content…';
-        // reset any previous nav offset
-        nav.style.marginTop = '';
-
-        try {
-            const res = await fetch(path);
-            if (!res.ok) throw new Error('Fetch failed: ' + res.status);
-            const text = await res.text();
-            const parser = new DOMParser();
-            const doc = parser.parseFromString(text, 'text/html');
-
-            // extract title: prefer main h1, then any h1, then [data-page-title], then <title>
-            let titleText = '';
-            const mainH1 = doc.querySelector('main h1');
-            const anyH1 = doc.querySelector('h1');
-            const dataTitle = doc.querySelector('[data-page-title]');
-            if (mainH1) { titleText = mainH1.textContent.trim(); mainH1.remove(); }
-            else if (anyH1) { titleText = anyH1.textContent.trim(); anyH1.remove(); }
-            else if (dataTitle) { titleText = dataTitle.getAttribute('data-page-title').trim(); dataTitle.remove(); }
-            else if (doc.title) { titleText = doc.title.trim(); }
-            siteTitleEl.textContent = titleText;
-
-            // inject main content (prefer <main>)
-            const injected = doc.querySelector('main') || doc.body;
-            container.innerHTML = injected ? injected.innerHTML : text;
-
-            // run any inline scripts found in the injected content
-            container.querySelectorAll('script').forEach(oldScript => {
-                const s = document.createElement('script');
-                if (oldScript.src) s.src = oldScript.src;
-                s.textContent = oldScript.textContent;
-                document.body.appendChild(s).remove();
-            });
-
-            // align nav button with the primary text block in the injected content
-            alignNavToContent();
-        } catch (err) {
-            console.warn('Fetch failed, falling back to iframe:', err);
-            container.innerHTML = '';
-            const iframe = document.createElement('iframe');
-            iframe.src = path;
-            iframe.title = 'Content';
-            iframe.style = 'width:100%;min-height:360px;border:0;border-radius:8px;overflow:hidden';
-            container.appendChild(iframe);
-            // try to align to iframe top after it loads
-            iframe.addEventListener('load', () => setTimeout(alignNavToContent, 120));
-        }
-    }
-
-    function alignNavToContent() {
-        const container = document.getElementById('page-content');
-        const headerInner = document.querySelector('.header-inner');
-        const nav = headerInner.querySelector('nav');
-
-        // choose preferred reference element inside the injected content:
-        // first try .content .text (the text card), then .content, then .intro, then first section
-        const ref = container.querySelector('.content .text') ||
-                    container.querySelector('.content') ||
-                    container.querySelector('.intro') ||
-                    container.querySelector('section') ||
-                    container.firstElementChild;
-
-        if (!ref) {
-            nav.style.marginTop = '';
-            return;
-        }
-
-        // compute top offset of ref relative to the top of the header-inner
-        const refRect = ref.getBoundingClientRect();
-        const headerRect = headerInner.getBoundingClientRect();
-
-        // desired margin top inside header so nav's top aligns with ref's top on the page
-        const desired = Math.max(0, Math.round(refRect.top - headerRect.top));
-
-        // limit the margin so nav doesn't push the header excessively tall (cap at 120px)
-        const cap = 140;
-        nav.style.marginTop = (desired > cap ? cap : desired) + 'px';
-        nav.style.transition = 'margin-top 180ms ease';
-    }
-
-    // recompute alignment on resize and after initial load
-    window.addEventListener('resize', () => {
-        // small debounce
-        clearTimeout(window._alignNavTimeout);
-        window._alignNavTimeout = setTimeout(alignNavToContent, 120);
-    });
-
-    // initial load
-    loadContent('content.html');
-
-    // nav button behavior
-    document.addEventListener('click', (e) => {
-        const btn = e.target.closest('button[data-src]');
-        if (!btn) return;
-        const src = btn.getAttribute('data-src');
-        loadContent(src);
-    });
-    </script>
 </body>
 </html>
