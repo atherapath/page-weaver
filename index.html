@@ -10,13 +10,15 @@
     <header class="site-header" role="banner" aria-label="Primary">
         <div class="header-inner" style="display:flex;align-items:center;justify-content:space-between;gap:1rem;max-width:1100px;margin:0 auto;width:100%;">
             <div class="logo" aria-label="Spencer Log">
-                <img src="assets/logo.jpg" alt="Spencer Log logo" width="36" height="36">
+                <img src="assets/logo.jpg" alt="Spencer Log logo" width="128" height="128">
                 <strong>Spencer Log</strong>
             </div>
 
+            <!-- center title pulled from content.html -->
+            <div id="site-title" class="site-title" aria-live="polite" aria-atomic="true"></div>
+
             <nav aria-label="Primary navigation">
                 <button data-src="content.html" id="btn-content" style="background:transparent;border:1px solid rgba(255,255,255,0.06);color:var(--black);padding:.45rem .8rem;border-radius:6px;cursor:pointer">Content</button>
-                <!-- add more nav buttons (other content files) as needed -->
             </nav>
         </div>
     </header>
@@ -35,6 +37,7 @@
     // load content.html into #page-content by extracting its <main> if present
     async function loadContent(path = 'content.html') {
         const container = document.getElementById('page-content');
+        const siteTitleEl = document.getElementById('site-title');
         container.textContent = 'Loading content…';
         try {
             const res = await fetch(path);
@@ -42,9 +45,23 @@
             const text = await res.text();
             const parser = new DOMParser();
             const doc = parser.parseFromString(text, 'text/html');
+
+            // extract title: prefer main h1, then any h1, then [data-page-title], then <title>
+            let titleText = '';
+            const mainH1 = doc.querySelector('main h1');
+            const anyH1 = doc.querySelector('h1');
+            const dataTitle = doc.querySelector('[data-page-title]');
+            if (mainH1) { titleText = mainH1.textContent.trim(); mainH1.remove(); }
+            else if (anyH1) { titleText = anyH1.textContent.trim(); anyH1.remove(); }
+            else if (dataTitle) { titleText = dataTitle.getAttribute('data-page-title').trim(); dataTitle.remove(); }
+            else if (doc.title) { titleText = doc.title.trim(); }
+
+            siteTitleEl.textContent = titleText;
+
             // prefer the main element of the external file, otherwise use body
             const injected = doc.querySelector('main') || doc.body;
             container.innerHTML = injected ? injected.innerHTML : text;
+
             // optionally run inline scripts from content.html (if any)
             container.querySelectorAll('script').forEach(oldScript => {
                 const s = document.createElement('script');
