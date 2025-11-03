@@ -40,6 +40,8 @@ main{
 
 /* Intro uses the same card + text look but is full-width and slimmer */
 .intro{
+    /* full width of the centered main container */
+    display:block;
     width:100%;
     padding:0.6rem 1.25rem; /* slimmer vertical padding */
     margin:0 0 1rem 0;
@@ -55,14 +57,18 @@ main{
     display:flex;
     gap:1.5rem;
     align-items:stretch;
+    width:100%;
 }
 
+/* Cards: use flexible layout so two cards share the row precisely */
 .card{
     background:rgba(29,185,84,0.06); /* subtle green tint on black */
     border:2px solid rgba(29,185,84,0.15);
     border-radius:8px;
     overflow:hidden;
-    width:50%;
+    /* use flex so two .card items divide the available width evenly */
+    flex: 1 1 0;
+    min-width: 0; /* prevent overflow when content is long */
     display:flex;
     flex-direction:column;
 }
@@ -111,6 +117,6 @@ footer{
     .intro{padding:0.5rem 0.9rem}
     main{padding:1rem}
     .content{flex-direction:column}
-    .card{width:100%}
+    .card{flex-basis:100%}
     header{font-size:1.05rem;padding:1rem}
 }
