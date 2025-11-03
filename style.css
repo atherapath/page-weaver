@@ -36,8 +36,8 @@ header .header-inner .logo{
     gap:0.5rem;
 }
 header .header-inner .logo img{
-    width:36px;
-    height:36px;
+    width:128px;
+    height:128px;
     display:block;
     object-fit:cover;
     border-radius:4px; /* optional */
