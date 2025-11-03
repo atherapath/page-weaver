@@ -20,22 +20,23 @@ body{
     min-height:100vh;
 }
 
+/* header */
 header{
     background:linear-gradient(90deg,var(--green),var(--dark-green));
     color:var(--black);
-    padding:1.25rem;
+    padding:1rem;               /* reduced to match intro/content gap */
     text-align:center;
     font-weight:700;
     font-size:1.25rem;
     box-shadow: 0 4px 12px rgba(0,0,0,0.6);
 }
 
+/* logo inside header */
 header .header-inner .logo{
     display:flex;
     align-items:center;
     gap:0.75rem;
-    /* create green space above and below the logo that matches page spacing */
-    padding: 1rem 0;          /* matches the spacing used between sections */
+    padding: 0;                /* remove extra vertical padding so spacing equals intro/content gap */
 }
 header .header-inner .logo img{
     width:128px;
