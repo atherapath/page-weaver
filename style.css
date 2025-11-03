@@ -52,6 +52,20 @@ main{
     line-height:1.4;
 }
 
+/* Make intro and closing match: same padding and bottom gap */
+.intro,
+.closing {
+    display: block;
+    width: 100%;
+    padding: 0.6rem 1.25rem;
+    margin: 0 0 1rem 0;
+    /* If you prefer exactly the intro background/border, omit these lines
+       because .card.text may already provide them; include to be explicit: */
+    background: rgba(29,185,84,0.03);
+    border: 2px solid rgba(29,185,84,0.12);
+    border-radius: 8px;
+}
+
 /* Content area: image and text side-by-side */
 .content{
     display:flex;
