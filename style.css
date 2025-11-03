@@ -58,9 +58,7 @@ main{
     display: block;
     width: 100%;
     padding: 0.6rem 1.25rem;
-    margin: 0 0 1rem 0;
-    /* If you prefer exactly the intro background/border, omit these lines
-       because .card.text may already provide them; include to be explicit: */
+    margin: 1rem 0 1rem 0; /* top and bottom gap match the intro */
     background: rgba(29,185,84,0.03);
     border: 2px solid rgba(29,185,84,0.12);
     border-radius: 8px;
