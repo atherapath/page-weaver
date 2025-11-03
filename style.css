@@ -20,37 +20,39 @@ body{
     min-height:100vh;
 }
 
-/* header shell: top/bottom padding matches the intro/content gap (1rem) */
+/* header shell: keep the green band small and make logo spacing match section gaps */
 .site-header{
     background: linear-gradient(90deg,var(--green),var(--dark-green));
     color:var(--black);
-    padding: 1rem 0;               /* top/bottom spacing = 1rem */
+    padding: 0;               /* header inner handles vertical spacing */
     box-shadow: 0 4px 12px rgba(0,0,0,0.6);
 }
 
 /* inner centered row (same max-width as main) */
 .site-header .header-inner{
     display:flex;
-    align-items:center;            /* vertical centering */
+    align-items:flex-start;      /* align items to the top so we can control per-item offsets */
     justify-content:space-between;
     gap:1rem;
     max-width:1100px;
     margin:0 auto;
     width:100%;
-    padding:0;                     /* ensure no extra vertical padding */
+    padding:1rem 0;              /* top/bottom gap equals section-gap (1rem) */
 }
 
-/* logo area: no extra padding so green band equals header padding */
+/* logo area: no extra vertical padding; use margin to match section spacing */
 .site-header .logo{
     display:flex;
     align-items:center;
     gap:0.75rem;
+    margin:0;                    /* no extra padding inside logo block */
 }
 
-/* keep large image but remove extra vertical spacing */
+/* tune image size so the green band above/below equals the section gap
+   reduce height from 128 if you want a tighter band; current margins are controlled by header-inner padding */
 .site-header .logo img{
-    width:128px;
-    height:128px;
+    width:96px;                  /* reduced from 128 to avoid large green band */
+    height:96px;
     display:block;
     object-fit:cover;
     border-radius:6px;
@@ -68,8 +70,21 @@ body{
     word-break:break-word;
 }
 
-/* ensure header inner keeps vertical centering with bigger logo */
-.site-header .header-inner{ align-items:center; }
+/* nav button styling and top alignment control */
+.site-header nav{
+    display:flex;
+    align-items:flex-start;   /* let the nav start at top of header-inner */
+}
+.site-header .nav-btn{
+    background:transparent;
+    border:1px solid rgba(255,255,255,0.06);
+    color:var(--black);
+    padding:.45rem .8rem;
+    border-radius:6px;
+    cursor:pointer;
+    line-height:1;
+    margin-top:0;             /* will be adjusted by JS to align with content text */
+}
 
 main{
     flex:1 0 auto;

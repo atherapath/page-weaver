@@ -22,22 +22,27 @@
         </div>
     </header>
 
-    <main id="shell-main" style="flex:1 0 auto;padding:2rem;max-width:1100px;margin:0 auto;width:100%;">
+    <main id="shell-main">
         <div id="page-content" aria-live="polite">
             Loading content…
         </div>
     </main>
 
-    <footer role="contentinfo" style="background:#07110a;color:var(--green);text-align:center;padding:.75rem 1rem;border-top:1px solid rgba(29,185,84,0.08);">
+    <footer role="contentinfo">
         © 2025 — Minimal Green & Black Template
     </footer>
 
     <script>
-    // load content.html into #page-content by extracting its <main> if present
+    // load content.html into #page-content and align the right-hand nav button
     async function loadContent(path = 'content.html') {
         const container = document.getElementById('page-content');
         const siteTitleEl = document.getElementById('site-title');
+        const headerInner = document.querySelector('.header-inner');
+        const nav = headerInner.querySelector('nav');
         container.textContent = 'Loading content…';
+        // reset any previous nav offset
+        nav.style.marginTop = '';
+
         try {
             const res = await fetch(path);
             if (!res.ok) throw new Error('Fetch failed: ' + res.status);
@@ -54,22 +59,23 @@
             else if (anyH1) { titleText = anyH1.textContent.trim(); anyH1.remove(); }
             else if (dataTitle) { titleText = dataTitle.getAttribute('data-page-title').trim(); dataTitle.remove(); }
             else if (doc.title) { titleText = doc.title.trim(); }
-
             siteTitleEl.textContent = titleText;
 
-            // prefer the main element of the external file, otherwise use body
+            // inject main content (prefer <main>)
             const injected = doc.querySelector('main') || doc.body;
             container.innerHTML = injected ? injected.innerHTML : text;
 
-            // optionally run inline scripts from content.html (if any)
+            // run any inline scripts found in the injected content
             container.querySelectorAll('script').forEach(oldScript => {
                 const s = document.createElement('script');
                 if (oldScript.src) s.src = oldScript.src;
                 s.textContent = oldScript.textContent;
                 document.body.appendChild(s).remove();
             });
+
+            // align nav button with the primary text block in the injected content
+            alignNavToContent();
         } catch (err) {
-            // fetch may be blocked on file:// — fallback to iframe
             console.warn('Fetch failed, falling back to iframe:', err);
             container.innerHTML = '';
             const iframe = document.createElement('iframe');
@@ -77,18 +83,58 @@
             iframe.title = 'Content';
             iframe.style = 'width:100%;min-height:360px;border:0;border-radius:8px;overflow:hidden';
             container.appendChild(iframe);
+            // try to align to iframe top after it loads
+            iframe.addEventListener('load', () => setTimeout(alignNavToContent, 120));
         }
     }
+
+    function alignNavToContent() {
+        const container = document.getElementById('page-content');
+        const headerInner = document.querySelector('.header-inner');
+        const nav = headerInner.querySelector('nav');
+
+        // choose preferred reference element inside the injected content:
+        // first try .content .text (the text card), then .content, then .intro, then first section
+        const ref = container.querySelector('.content .text') ||
+                    container.querySelector('.content') ||
+                    container.querySelector('.intro') ||
+                    container.querySelector('section') ||
+                    container.firstElementChild;
+
+        if (!ref) {
+            nav.style.marginTop = '';
+            return;
+        }
+
+        // compute top offset of ref relative to the top of the header-inner
+        const refRect = ref.getBoundingClientRect();
+        const headerRect = headerInner.getBoundingClientRect();
+
+        // desired margin top inside header so nav's top aligns with ref's top on the page
+        const desired = Math.max(0, Math.round(refRect.top - headerRect.top));
+
+        // limit the margin so nav doesn't push the header excessively tall (cap at 120px)
+        const cap = 140;
+        nav.style.marginTop = (desired > cap ? cap : desired) + 'px';
+        nav.style.transition = 'margin-top 180ms ease';
+    }
+
+    // recompute alignment on resize and after initial load
+    window.addEventListener('resize', () => {
+        // small debounce
+        clearTimeout(window._alignNavTimeout);
+        window._alignNavTimeout = setTimeout(alignNavToContent, 120);
+    });
 
     // initial load
     loadContent('content.html');
 
-    // nav button behavior (loads other content files when added)
-    document.querySelectorAll('button[data-src]').forEach(btn => {
-        btn.addEventListener('click', () => {
-            const src = btn.getAttribute('data-src');
-            loadContent(src);
-        });
+    // nav button behavior
+    document.addEventListener('click', (e) => {
+        const btn = e.target.closest('button[data-src]');
+        if (!btn) return;
+        const src = btn.getAttribute('data-src');
+        loadContent(src);
     });
     </script>
 </body>
