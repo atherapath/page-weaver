@@ -20,34 +20,40 @@ body{
     min-height:100vh;
 }
 
-/* header */
-header{
-    background:linear-gradient(90deg,var(--green),var(--dark-green));
+/* header shell: top/bottom padding matches the intro/content gap (1rem) */
+.site-header{
+    background: linear-gradient(90deg,var(--green),var(--dark-green));
     color:var(--black);
-    padding:1rem;               /* reduced to match intro/content gap */
-    text-align:center;
-    font-weight:700;
-    font-size:1.25rem;
+    padding: 1rem 0;               /* top/bottom spacing = 1rem */
     box-shadow: 0 4px 12px rgba(0,0,0,0.6);
 }
 
-/* logo inside header */
-header .header-inner .logo{
+/* inner centered row (same max-width as main) */
+.site-header .header-inner{
+    display:flex;
+    align-items:center;            /* vertical centering */
+    justify-content:space-between;
+    gap:1rem;
+    max-width:1100px;
+    margin:0 auto;
+    width:100%;
+    padding:0;                     /* ensure no extra vertical padding */
+}
+
+/* logo area: no extra padding so green band equals header padding */
+.site-header .logo{
     display:flex;
     align-items:center;
     gap:0.75rem;
-    padding: 0;                /* remove extra vertical padding so spacing equals intro/content gap */
 }
-header .header-inner .logo img{
+
+/* keep large image but remove extra vertical spacing */
+.site-header .logo img{
     width:128px;
     height:128px;
     display:block;
     object-fit:cover;
     border-radius:6px;
-}
-header .header-inner .logo strong{
-    color:var(--black);
-    font-weight:700;
 }
 
 /* centered page title pulled from content.html */
