@@ -1,6 +1,6 @@
-# The Gas-Powered Circus
+## The Gas-Powered Circus
 
-## Opening Act: The Spectacle of Pressure
+**Opening Act: The Spectacle of Pressure**
 Welcome, ladies, gentlemen, and assorted mechanical attendees, to the grand **Gas-Powered Circus** — where everything hums, hisses, and breathes through a nozzle.  
 Here, air itself has been:
 - **Branded**
