@@ -33,7 +33,7 @@ body {
 .pw-header h1 {
   margin: 0 0 6px;
   color: var(--accent);
-  letter-spacing: .5px;
+  letter-spacing: .1px;
   text-shadow: 0 0 6px rgba(60,255,0,.35);
 }
 .pw-sub { color: var(--fg-dim); font-size: .95rem; opacity: .9; }
