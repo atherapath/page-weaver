@@ -82,6 +82,37 @@
       });
   }
 
+// === CHAIN IMAGE CYCLER ===================================================
+  (function handleImageChain() {
+    if (!imgEl) return;
+    const baseName = base.replace(/\.html$/i, "");
+    const chain1 = `./${baseName}_chain_1.jpg`;
+    const chain2 = `./${baseName}_chain_2.jpg`;
+
+    // Preload both
+    [chain1, chain2].forEach(src => {
+      const img = new Image();
+      img.src = src;
+    });
+
+    // Check if both exist, then swap every 6s
+    fetch(chain1, { method: "HEAD" })
+      .then(r1 => {
+        if (!r1.ok) return;
+        fetch(chain2, { method: "HEAD" })
+          .then(r2 => {
+            if (!r2.ok) return;
+            let showing = 1;
+            setInterval(() => {
+              showing = showing === 1 ? 2 : 1;
+              imgEl.src = showing === 1 ? chain1 : chain2;
+            }, 6000);
+          })
+          .catch(() => {});
+      })
+      .catch(() => {});
+  })();
+
   // === LOAD MARKDOWN ========================================================
   fetch(mdUrl, { cache: "no-store" })
     .then(r => (r.ok ? r.text() : Promise.reject(new Error(r.statusText))))
