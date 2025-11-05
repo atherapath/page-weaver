@@ -16,7 +16,7 @@ body {
   background: var(--bg);
   color: var(--fg);
   font-family: var(--font);
-  line-height: 1.6;
+  line-height: 0.8;
   text-rendering: optimizeLegibility;
 }
 
