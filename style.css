@@ -127,7 +127,7 @@ body:before {
 @media (min-width: 900px) {
   .pw-main {
     display: grid;
-    grid-template-columns: 1fr 2fr;
+    grid-template-columns: 1fr 1.5fr;
     gap: 24px;
     align-items: start;
   }
