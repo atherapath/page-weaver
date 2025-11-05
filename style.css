@@ -107,6 +107,22 @@ code, pre {
 }
 pre { padding: .6rem .8rem; overflow-x: auto; }
 
+.pw-intro,
+.pw-closer {
+  grid-column: 1 / -1;
+  background: #eaf8e5;
+  border: 2px solid #009e47;
+  border-radius: 1.5rem;
+  padding: 1.5rem;
+  margin: 2rem 0;
+  box-shadow: 0 0 10px rgba(0, 158, 71, 0.2);
+}
+
+.pw-intro p,
+.pw-closer p {
+  margin: 0.5rem 0;
+}
+
 /* ===== Subtle CRT scanline vibe ===== */
 body:before {
   content: "";
