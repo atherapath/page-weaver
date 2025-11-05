@@ -74,6 +74,9 @@ body {
   background: rgba(60,255,0,.02);
   padding: 18px;
   border-radius: 10px;
+  font-size: 0.92rem;      /* Makes text a bit smaller */
+  line-height: 1.2;        /* Less vertical space between lines */
+  letter-spacing: 0.01em;  /* Less space between letters, or use -0.01em for even tighter */
 }
 .pw-article h1, .pw-article h2, .pw-article h3 {
   color: var(--accent);
