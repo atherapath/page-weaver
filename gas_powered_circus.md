@@ -36,7 +36,7 @@ They don’t see the irony that the same gas powering their compressors keeps ev
 
 ---
 
-## Act IV: Nature’s Rebellion
+**Act IV: Nature’s Rebellion**
 Outside the tent, nature does it all for free.
 - Trees don’t invoice the wind.  
 - Soil exhales in rhythm.  
@@ -47,7 +47,7 @@ But it’s also an **opera of captivity**, every hiss a confession that we’ve 
 
 ---
 
-## Curtain Call
+**Curtain Call**
 The clowns here don’t wear paint; they wear ID badges.  
 Their act? Convincing you the compressor is sacred, the hiss is holy.  
 
