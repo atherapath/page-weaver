@@ -12,7 +12,7 @@ Here, air itself has been:
 
 ---
 
-## Act II: The Subscription to Breathing
+**Act II: The Subscription to Breathing**
 Everywhere I look:
 - A new valve  
 - A new sigh of something being squeezed  
@@ -25,7 +25,7 @@ Even laughter now comes in cans.
 
 ---
 
-## Act III: The Clergy of Compression
+**Act III: The Clergy of Compression**
 Who’s running the show?
 - NPCs with lanyards and policies  
 - Flags of mild competence flapping in an artificial wind  
