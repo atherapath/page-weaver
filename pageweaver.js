@@ -37,9 +37,8 @@
       if (capEl) capEl.style.display = "none";
     };
   }
-  if (capEl) {
-  capEl.innerHTML = `Filename: <a href="./${base}.jpg" target="_blank">${base}.jpg</a>`;
-
+  if (capEl) capEl.textContent = "Filename: " + base + ".jpg";
+  
   fetch(mdUrl, { cache: "no-store" })
     .then(r => r.ok ? r.text() : Promise.reject(new Error(r.statusText)))
     .then(text => { mdEl.innerHTML = renderMarkdown(text); })
