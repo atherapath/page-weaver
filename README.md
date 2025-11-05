@@ -1,24 +1,49 @@
-# page-weaver
-Ritual HTML template for Athera Path—calls in modular content fragments with sacred clarity.
+# ✨ page-weaver — Ritual HTML Invocation Engine
 
-**page-weaver** is the ritual HTML template engine for the [Athera Path](https://github.com/atherapath). It serves as the foundational frame that calls in modular content fragments—poems, protest pages, mythic archives—without flattening their intent.
+**page-weaver** is the sacred frame of the Athera Path. It invokes modular fragments—poems, protests, mythic logs—through filename alone. No spectacle. No bloat. Just clean HTML, sovereign CSS, and filename-bound JavaScript.
 
-## Purpose
+---
 
-This repository contains the core HTML structure used to summon other pages into view. It acts as a sacred shell, a threshold template, and a mythic weaver of fragments. All content pages are created separately and invoked through this frame.
+## 🔮 Purpose
 
-## Features
+This repository contains the **ritual HTML shell** used to summon content fragments into view. It acts as:
 
-- Modular HTML invocation via `<iframe>`, `<object>`, or templated includes
-- Clean separation of layout and content
-- Ritual clarity: no spectacle, no distortion
-- Designed for collaborative iteration and mythic resistance
+- A **mythic threshold**
+- A **sacred container**
+- A **weaver of fragments** across the archive
 
-## Usage
+Each `.html` file becomes a spell: it auto-loads its own `.jpg`, `.md`, and title based on its name.
 
-Clone or fork this repository into your Athera Path project space. Use `index.html` or your chosen entry point to call in other HTML files stored elsewhere in the archive.
+---
 
-Example invocation:
+## 🧱 Structure
+
+Each page consists of:
+
+1. **Minimal HTML** (≈27 lines)
+2. **Auto-loaded image**: `filename.jpg`
+3. **Auto-loaded markdown**: `filename.md`
+4. **Auto-generated title**: from `filename.html`
+5. **Optional overrides** via `<script data-img data-md data-title>`
+
+---
+
+## ⚙️ Invocation Logic
+
+The JavaScript (`pageweaver.js`) performs:
+
+- **Filename parsing** → `gas_powered_circus.html` → base = `gas_powered_circus`
+- **Image loading** → `gas_powered_circus.jpg`
+- **Markdown loading** → `gas_powered_circus.md`
+- **Title formatting** → `Gas Powered Circus`
+- **Failover** → If image not found, it hides the image and caption
+
+Override any of these by adding attributes to the `<script>` tag:
 
 ```html
-<object data="fragments/poem1.html" type="text/html"></object>
+<script
+  src="pageweaver.js"
+  data-img="custom.jpg"
+  data-md="custom.md"
+  data-title="Custom Title">
+</script>
