@@ -38,6 +38,43 @@
     };
   }
   if (capEl) capEl.textContent = "Filename: " + base + ".jpg";
+
+// === VIDEO LOADER (adds separate green-bordered section under the image) ===
+function insertVideoBlock(baseName, container) {
+  // Optional override from data attribute or a global (either is fine)
+  const overrideFromAttr = (container && container.dataset && container.dataset.video) ? container.dataset.video.trim() : '';
+  const overrideFromGlobal = (typeof window !== 'undefined' && window.PW_VIDEO_OVERRIDE) ? String(window.PW_VIDEO_OVERRIDE).trim() : '';
+  const source = overrideFromAttr || overrideFromGlobal || `${baseName}.mp4`;
+
+  if (!source) return;
+
+  // HEAD check so we don’t render an empty box if file isn’t present
+  fetch(source, { method: 'HEAD' })
+    .then((res) => {
+      if (!res.ok) return; // silent skip
+
+      const section = document.createElement('section');
+      section.className = 'pw-video';
+      section.innerHTML = `
+        <video
+          src="${source}"
+          autoplay
+          muted
+          loop
+          playsinline
+          preload="metadata"
+          aria-label="Short ambient clip for ${baseName}">
+        </video>
+        <noscript>
+          <p><a href="${source}">Download/play the MP4</a></p>
+        </noscript>
+      `;
+      container.appendChild(section);
+    })
+    .catch(() => {
+      // silent skip on network error
+    });
+}
   
   fetch(mdUrl, { cache: "no-store" })
     .then(r => r.ok ? r.text() : Promise.reject(new Error(r.statusText)))
