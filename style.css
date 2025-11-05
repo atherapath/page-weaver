@@ -16,7 +16,6 @@ body {
   background: var(--bg);
   color: var(--fg);
   font-family: var(--font);
-  
   text-rendering: optimizeLegibility;
 }
 
@@ -74,11 +73,11 @@ body {
   padding: 18px;
   border-radius: 10px;
   font-size: 0.92rem;      /* Makes text a bit smaller */
-  max-height: 80vh;     /* Adjust as desired for visible space, e.g. 80% of viewport height */
-  overflow-y: auto;/* Show vertical scroll when needed */
+  max-height: 80vh;        /* 80% of viewport height */
+  overflow-y: auto;        /* Vertical scroll when needed */
   scrollbar-width: thin;
   scrollbar-color: rgba(60, 255, 0, 0.4) rgba(60, 255, 0, 0.02);
-  letter-spacing: 0.01em;  /* Less space between letters, or use -0.01em for even tighter */
+  letter-spacing: 0.01em;  /* Slightly tighter text */
 }
 .pw-article h1, .pw-article h2, .pw-article h3 {
   color: var(--accent);
@@ -133,17 +132,16 @@ body:before {
     gap: 24px;
     align-items: start;
   }
-  .pw-figure { order: 1; }
-  .pw-article { order: 2; }
-}
-.pw-article::-webkit-scrollbar {
-  width: 8px;
+
+  /* Explicit column pinning so video sits UNDER the image */
+  .pw-figure { grid-column: 1; }
+  .pw-video  { grid-column: 1; } /* NEW: ensures video stacks below image */
+  .pw-article{ grid-column: 2; }
 }
 
-.pw-article::-webkit-scrollbar-track {
-  background: rgba(60, 255, 0, 0.02);
-}
-
+/* Scrollbar (WebKit) */
+.pw-article::-webkit-scrollbar { width: 8px; }
+.pw-article::-webkit-scrollbar-track { background: rgba(60, 255, 0, 0.02); }
 .pw-article::-webkit-scrollbar-thumb {
   background-color: rgba(60, 255, 0, 0.4);
   border-radius: 4px;
@@ -163,7 +161,11 @@ body:before {
   border-radius: var(--pw-radius);
   padding: calc(var(--pw-gutter) * 0.8);
   margin-top: calc(var(--pw-gutter) * 1);
+
+  /* Fallback first, then color-mix for modern browsers */
+  background: rgba(60,255,0,.03);
   background: color-mix(in srgb, var(--pw-accent-green) 6%, transparent);
+
   scrollbar-gutter: stable;
 }
 
