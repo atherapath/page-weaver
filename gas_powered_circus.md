@@ -1,7 +1,7 @@
 ## The Gas-Powered Circus
 ---
 
-##Opening Act: The Spectacle of Pressure##
+## Opening Act: The Spectacle of Pressure
 **Welcome**, ladies, gentlemen, and assorted mechanical attendees, to the grand **Gas-Powered Circus** — where everything hums, hisses, and breathes through a nozzle.  
 Here, air itself has been:
 - **Branded**
@@ -13,7 +13,7 @@ Here, air itself has been:
 
 ---
 
-##Act II: The Subscription to Breathing##
+## Act II: The Subscription to Breathing
 Everywhere I look:
 - A new valve  
 - A new sigh of something being squeezed  
@@ -26,7 +26,7 @@ Even laughter now comes in cans.
 
 ---
 
-##Act III: The Clergy of Compression##
+## Act III: The Clergy of Compression
 Who’s running the show?
 - NPCs with lanyards and policies  
 - Flags of mild competence flapping in an artificial wind  
@@ -37,7 +37,7 @@ They don’t see the irony that the same gas powering their compressors keeps ev
 
 ---
 
-##Act IV: Nature’s Rebellion##
+## Act IV: Nature’s Rebellion
 Outside the tent, nature does it all for free.
 - Trees don’t invoice the wind.  
 - Soil exhales in rhythm.  
@@ -48,7 +48,7 @@ But it’s also an **opera of captivity**, every hiss a confession that we’ve 
 
 ---
 
-##Curtain Call##
+## Curtain Call
 The clowns here don’t wear paint; they wear ID badges.  
 Their act? Convincing you the compressor is sacred, the hiss is holy.  
 
