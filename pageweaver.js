@@ -42,10 +42,9 @@
   }
   if (capEl) capEl.textContent = "Filename: " + base + ".jpg";
 
-  // === VIDEO LOADER (adds separate green-bordered section under the image) ===
+  // === VIDEO LOADER (sits under the image, not full-width) ==================
   function insertVideoBlock(baseName, container) {
-    const overrideFromAttr =
-      container?.dataset?.video?.trim?.() || "";
+    const overrideFromAttr = container?.dataset?.video?.trim?.() || "";
     const overrideFromGlobal =
       (typeof window !== "undefined" &&
         window.PW_VIDEO_OVERRIDE &&
@@ -82,52 +81,6 @@
       });
   }
 
-// === CHAIN IMAGE CYCLER ===================================================
-  (function handleImageChain() {
-    if (!imgEl) return;
-    const baseName = base.replace(/\.html$/i, "");
-    const chain1 = `./${baseName}_chain_1.jpg`;
-    const chain2 = `./${baseName}_chain_2.jpg`;
-
-    // Preload both
-    [chain1, chain2].forEach(src => {
-      const img = new Image();
-      img.src = src;
-    });
-
-    // Check if both exist, then swap every 6s
-    fetch(chain1, { method: "HEAD" })
-      .then(r1 => {
-        if (!r1.ok) return;
-        fetch(chain2, { method: "HEAD" })
-          .then(r2 => {
-            if (!r2.ok) return;
-            let showing = 1;
-            setInterval(() => {
-              showing = showing === 1 ? 2 : 1;
-              imgEl.src = showing === 1 ? chain1 : chain2;
-            }, 6000);
-          })
-          .catch(() => {});
-      })
-      .catch(() => {});
-  })();
-
-  // === LOAD MARKDOWN ========================================================
-  fetch(mdUrl, { cache: "no-store" })
-    .then(r => (r.ok ? r.text() : Promise.reject(new Error(r.statusText))))
-    .then(text => {
-      mdEl.innerHTML = renderMarkdown(text);
-    })
-    .catch(() => {
-      mdEl.innerHTML = `<p>No Markdown found for <code>${base}.md</code>.</p>`;
-    });
-
-  // === CALL VIDEO BLOCK =====================================================
-  // Find the same container that holds the hero image
-  const mediaContainer = imgEl?.parentElement;
-  if (mediaContainer) insertVideoBlock(base, mediaContainer);
-
   // === MARKDOWN RENDERER ====================================================
   function renderMarkdown(src) {
     src = src
@@ -161,4 +114,30 @@
     });
     return blocks.join("\n");
   }
-})();
+
+  // === INTRO/CLOSER PANELS FROM MD ==========================================
+  function extractPanel(src, tag) {
+    const re = new RegExp(`\\\[${tag}\\\]([\\s\\S]*?)\\\/${tag}\\\]`, "i");
+    const m = src.match(re);
+    return {
+      panel: m ? (m[1] || "").trim() : null,
+      rest: m ? (src.replace(re, "").trim()) : src
+    };
+  }
+
+  function insertPanel(where, mdText) {
+    if (!mdText) return;
+    const section = document.createElement("section");
+    section.className = where === "intro" ? "pw-intro" : "pw-closer";
+    section.innerHTML = renderMarkdown(mdText);
+
+    const root = document.getElementById("page-weaver-root") || document.body;
+    if (where === "intro") {
+      root.insertBefore(section, root.firstChild);
+    } else {
+      root.appendChild(section);
+    }
+  }
+
+  // === LOAD MARKDOWN (with intro/closer) ====================================
+  fetch(mdUrl, {
