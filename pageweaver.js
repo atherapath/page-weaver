@@ -37,7 +37,7 @@
       if (capEl) capEl.style.display = "none";
     };
   }
-  if (capEl) capEl.textContent = "Image loaded by filename: " + base + ".jpg";
+  if (capEl) capEl.textContent = "Filename: " + base + ".jpg";
 
   fetch(mdUrl, { cache: "no-store" })
     .then(r => r.ok ? r.text() : Promise.reject(new Error(r.statusText)))
