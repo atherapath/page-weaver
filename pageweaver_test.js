@@ -168,13 +168,13 @@ if (bannerEl) {
 
 // --- Bottom Banner Markdown: <slug>_bottom.md ---
 const bannerEl = document.getElementById("bottom-banner");
-if (bannerEl) {
+if (bottomEl) {
   try {
     const res = await fetch(`${dir}${slug}_bottom.md`, { cache: "no-store" });
     if (res.ok) {
       const text = await res.text();
       if (text && text.trim()) {
-        bannerEl.innerHTML = mdToHtml(text);
+        bottomEl.innerHTML = mdToHtml(text);
       }
     }
   } catch {}
