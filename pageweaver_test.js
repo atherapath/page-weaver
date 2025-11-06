@@ -7,6 +7,7 @@
    - Markdown logic: ONLY tries <slug>.md (unchanged otherwise)
    - Video logic: probes for <slug>.mp4 and injects below image in styled box
      * If not found, loads fallback public video and limits playback to 6 seconds
+     * Autoplay now works by muting the video
 */
 
 (() => {
@@ -150,7 +151,6 @@
       } catch {}
 
       if (!finalUrl) {
-        // Fallback public video (6s loop-friendly clip)
         finalUrl = "https://interactive-examples.mdn.mozilla.net/media/cc0-videos/flower.mp4";
       }
 
@@ -163,13 +163,13 @@
       videoEl.src = finalUrl;
       videoEl.autoplay = true;
       videoEl.loop = true;
+      videoEl.muted = true;
       videoEl.controls = true;
       videoEl.style.width = "100%";
       videoEl.style.border = "1px solid var(--border)";
       videoEl.style.borderRadius = "6px";
       videoEl.style.display = "block";
 
-      // Limit playback to 6 seconds
       videoEl.addEventListener("timeupdate", () => {
         if (videoEl.currentTime >= 6) {
           videoEl.pause();
