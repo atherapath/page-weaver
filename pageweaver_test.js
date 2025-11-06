@@ -152,6 +152,20 @@
       } catch {}
     }
 
+// --- Top Banner Markdown: <slug>_top.md ---
+const bannerEl = document.getElementById("top-banner");
+if (bannerEl) {
+  try {
+    const res = await fetch(`${dir}${slug}_top.md`, { cache: "no-store" });
+    if (res.ok) {
+      const text = await res.text();
+      if (text && text.trim()) {
+        bannerEl.innerHTML = mdToHtml(text);
+      }
+    }
+  } catch {}
+}
+
     // --- Video: probe for <slug>.mp4 or fallback to public test video ---
     const videoContainer = document.getElementById("video-container");
     if (videoContainer) {
