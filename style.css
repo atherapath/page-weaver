@@ -149,3 +149,7 @@ body:before {
   border-radius: 4px;
   border: 1px solid var(--border);
 }
+.pw-article {
+  scrollbar-width: thin;
+  scrollbar-color: rgba(60, 255, 0, 0.4) rgba(60, 255, 0, 0.02);
+}
