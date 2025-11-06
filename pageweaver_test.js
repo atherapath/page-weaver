@@ -167,14 +167,14 @@ if (bannerEl) {
 }
 
 // --- Bottom Banner Markdown: <slug>_bottom.md ---
-const bottomEl = document.getElementById("bottom-banner");
-if (bottomEl) {
+const bot-bannerEl = document.getElementById("bottom-banner");
+if (bot-bannerEl) {
   try {
     const res = await fetch(`${dir}${slug}_bottom.md`, { cache: "no-store" });
     if (res.ok) {
       const text = await res.text();
       if (text && text.trim()) {
-        bottomEl.innerHTML = mdToHtml(text);
+        bot-bannerEl.innerHTML = mdToHtml(text);
       }
     }
   } catch {}
