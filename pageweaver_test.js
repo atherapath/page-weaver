@@ -167,7 +167,7 @@ if (bannerEl) {
 }
 
 // --- Bottom Banner Markdown: <slug>_bottom.md ---
-const bannerEl = document.getElementById("bottom-banner");
+const bottomEl = document.getElementById("bottom-banner");
 if (bottomEl) {
   try {
     const res = await fetch(`${dir}${slug}_bottom.md`, { cache: "no-store" });
