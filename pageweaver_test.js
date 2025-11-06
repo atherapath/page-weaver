@@ -1,135 +1,104 @@
 /* pageweaver_test.js
-   - Sets page <title> and #page-title from the HTML filename
-   - Builds an image chain for #hero-image by probing base + _2.._6 across common extensions
-   - Runs a 6s slideshow if multiple images are found
-   - Optionally renders markdown (<filename>.md or test_image_chain.md) into #md-content
+   - Image chain from local files based on the HTML filename:
+       <slug>.(jpg|jpeg|png|webp),
+       <slug>_2.*, <slug>_3.*, <slug>_4.*, <slug>_5.*, <slug>_6.*
+   - If none exist, fall back to 6 random Picsum JPEGs.
+   - Rotates the hero image every 6 seconds.
+   - Does NOT touch markdown rendering.
 */
 
 (() => {
   const $ = (sel) => document.querySelector(sel);
 
+  // Extract directory and slug (filename without extension) from current URL
   const getFileContext = () => {
-    const url = new URL(window.location.href);
-    const path = url.pathname;
-    const dir = path.substring(0, path.lastIndexOf("/") + 1);
-    const file = path.substring(path.lastIndexOf("/") + 1);
+    const path = location.pathname;
+    const dir = path.slice(0, path.lastIndexOf("/") + 1);
+    const file = path.slice(path.lastIndexOf("/") + 1);
     const dot = file.lastIndexOf(".");
-    const nameNoExt = dot > -1 ? file.substring(0, dot) : file;
-    return { dir, file, nameNoExt };
+    const nameNoExt = dot >= 0 ? file.slice(0, dot) : file;
+    return { dir, nameNoExt };
   };
 
-  const toTitle = (slug) => {
-    const spaced = slug.replace(/[_-]+/g, " ").trim();
-    return spaced.replace(/\w\S*/g, (w) => w[0].toUpperCase() + w.slice(1));
-  };
-
-  const probeImage = (url) =>
+  // Probe a single URL by attempting to load it as an Image
+  const probeUrl = (url) =>
     new Promise((resolve) => {
       const img = new Image();
-      img.onload = () => resolve({ url, ok: true });
-      img.onerror = () => resolve({ url, ok: false });
+      img.onload = () => resolve(url);
+      img.onerror = () => resolve(null);
       img.decoding = "async";
-      img.src = url + (url.includes("?") ? "&" : "?") + "v=" + Date.now();
+      img.referrerPolicy = "no-referrer";
+      img.src = url + (url.includes("?") ? "&" : "?") + "ts=" + Date.now(); // bust cache while testing
     });
 
-  const findExistingInOrder = async (candidates) => {
-    const found = [];
-    for (const url of candidates) {
-      const res = await probeImage(url);
-      if (res.ok) found.push(res.url);
+  // For a given suffix, try extensions in order; return the first that exists (or null)
+  const firstExistingForSuffix = async ({ dir, slug, suffix, exts }) => {
+    for (const ext of exts) {
+      const url = `${dir}${slug}${suffix}${ext}`;
+      const ok = await probeUrl(url);
+      if (ok) return ok;
     }
-    return found;
+    return null;
   };
 
-  const mdToHtml = (md) => {
-    const esc = md
-      .replace(/&/g, "&amp;")
-      .replace(/</g, "&lt;")
-      .replace(/>/g, "&gt;");
+  // Build the ordered local image list: slug, slug_2 ... slug_6 (first existing per suffix)
+  const findLocalImages = async ({ dir, slug }) => {
+    const suffixes = ["", "_2", "_3", "_4", "_5", "_6"];
+    const exts = [".jpg", ".jpeg", ".png", ".webp"];
+    const images = [];
+    for (const sfx of suffixes) {
+      // eslint-disable-next-line no-await-in-loop
+      const found = await firstExistingForSuffix({ dir, slug, suffix: sfx, exts });
+      if (found) images.push(found);
+    }
+    return images;
+  };
 
-    let html = esc
-      .replace(/^###### (.*)$/gm, "<h6>$1</h6>")
-      .replace(/^##### (.*)$/gm, "<h5>$1</h5>")
-      .replace(/^#### (.*)$/gm, "<h4>$1</h4>")
-      .replace(/^### (.*)$/gm, "<h3>$1</h3>")
-      .replace(/^## (.*)$/gm, "<h2>$1</h2>")
-      .replace(/^# (.*)$/gm, "<h1>$1</h1>");
+  // If no locals, create six random Picsum JPEGs
+  const randomFallbacks = (count = 6) => {
+    const seedBase = Date.now();
+    const arr = [];
+    for (let i = 0; i < count; i++) {
+      const seed = `${seedBase}-${i}-${Math.random().toString(36).slice(2, 8)}`;
+      arr.push(`https://picsum.photos/seed/${encodeURIComponent(seed)}/1600/900.jpg`);
+    }
+    return arr;
+  };
 
-    html = html
-      .replace(/\*\*(.+?)\*\*/g, "<strong>$1</strong>")
-      .replace(/\*(.+?)\*/g, "<em>$1</em>")
-      .replace(/`([^`]+?)`/g, "<code>$1</code>");
+  // Start the slideshow
+  const startSlideshow = (urls, heroEl, captionEl) => {
+    if (!urls || urls.length === 0 || !heroEl) return;
 
-    html = html.replace(
-      /\[([^\]]+?)\]\((https?:\/\/[^\s)]+)\)/g,
-      '<a href="$2" target="_blank" rel="noopener noreferrer">$1</a>'
-    );
+    let i = 0;
+    const setSrc = () => {
+      // Add a small cache-buster in case external CDNs are sticky
+      heroEl.src = urls[i] + (urls[i].includes("?") ? "&" : "?") + "r=" + Math.random().toString(36).slice(2, 7);
+    };
 
-    html = html
-      .split(/\n{2,}/)
-      .map((chunk) => {
-        if (/^<h\d>/.test(chunk)) return chunk;
-        if (/^\s*[-*] /.test(chunk)) {
-          const items = chunk
-            .split(/\n/)
-            .map((l) => l.replace(/^\s*[-*] /, ""))
-            .map((li) => `<li>${li}</li>`)
-            .join("");
-          return `<ul>${items}</ul>`;
-        }
-        return `<p>${chunk.replace(/\n/g, "<br>")}</p>`;
-      })
-      .join("\n");
+    setSrc();
+    if (captionEl) {
+      captionEl.textContent = `Image chain slideshow (${urls.length} images, 6s each)`;
+    }
 
-    return html;
+    setInterval(() => {
+      i = (i + 1) % urls.length;
+      setSrc();
+    }, 6000);
   };
 
   document.addEventListener("DOMContentLoaded", async () => {
     const { dir, nameNoExt } = getFileContext();
+    const hero = $("#hero-image");
+    const caption = $("#hero-caption");
 
-    const titleText = toTitle(nameNoExt);
-    document.title = titleText;
-    const h1 = $("#page-title");
-    if (h1) h1.textContent = titleText;
+    // Try local images first
+    let images = await findLocalImages({ dir, slug: nameNoExt });
 
-    const exts = [".jpg", ".jpeg", ".png", ".webp"];
-    const suffixes = ["", "_2", "_3", "_4", "_5", "_6"];
-    const candidates = [];
-    for (const sfx of suffixes) {
-      for (const ext of exts) {
-        candidates.push(`${dir}${nameNoExt}${sfx}${ext}`);
-      }
-    }
-
-    const images = await findExistingInOrder(candidates);
-    const heroImg = $("#hero-image");
-    const heroCaption = $("#hero-caption");
-
+    // Fallback to random Picsum set if none found
     if (images.length === 0) {
-      const fig = heroImg?.closest("figure");
-      if (fig) fig.style.display = "none";
-    } else if (images.length === 1) {
-      heroImg.src = images[0];
-      if (heroCaption) heroCaption.textContent = "Single image found";
-    } else {
-      let i = 0;
-      heroImg.src = images[0];
-      if (heroCaption)
-        heroCaption.textContent = `Image chain slideshow (${images.length} images, 6s each)`;
-      setInterval(() => {
-        i = (i + 1) % images.length;
-        heroImg.src = images[i];
-      }, 6000);
+      images = randomFallbacks(6);
     }
 
-    const mdTargets = [`${dir}${nameNoExt}.md`, `${dir}test_image_chain.md`];
-    const mdContainer = $("#md-content");
-
-    if (mdContainer) {
-      for (const mdUrl of mdTargets) {
-        try {
-          const res = await fetch(mdUrl, { cache: "no-store" });
-          if (res.ok) {
-            const text = await res.text();
-            if (text && text.trim().length > 0) {
-              mdContainer.innerHTML = mdToHtml(text);
+    startSlideshow(images, hero, caption);
+  });
+})();
