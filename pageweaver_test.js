@@ -7,6 +7,28 @@
    - Markdown logic: ONLY tries <slug>.md (unchanged otherwise)
 */
 
+// --- Video: probe for <slug>.mp4 and embed if found ---
+    const videoContainer = document.getElementById("video-container");
+    if (videoContainer) {
+      const videoUrl = `${dir}${slug}.mp4`;
+      try {
+        const res = await fetch(videoUrl, { method: "HEAD", cache: "no-store" });
+        if (res.ok) {
+          const videoEl = document.createElement("video");
+          videoEl.src = videoUrl;
+          videoEl.controls = true;
+          videoEl.autoplay = true;
+          videoEl.loop = true;
+          videoEl.style.border = "4px solid green";
+          videoEl.style.width = "100%";
+          videoEl.style.maxWidth = "800px";
+          videoEl.style.display = "block";
+          videoEl.style.margin = "2em auto";
+          videoContainer.appendChild(videoEl);
+        }
+      } catch {}
+    }
+
 (() => {
   const $ = (sel) => document.querySelector(sel);
 
