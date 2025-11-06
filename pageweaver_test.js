@@ -1,104 +1,138 @@
 /* pageweaver_test.js
-   - Image chain from local files based on the HTML filename:
-       <slug>.(jpg|jpeg|png|webp),
-       <slug>_2.*, <slug>_3.*, <slug>_4.*, <slug>_5.*, <slug>_6.*
-   - If none exist, fall back to 6 random Picsum JPEGs.
-   - Rotates the hero image every 6 seconds.
-   - Does NOT touch markdown rendering.
+   - Slideshow only change:
+       * Shows fallback Picsum images immediately (no initial blank)
+       * Probes for local images: <slug>.(jpg|jpeg|png|webp) and <slug>_2.._6.*
+       * If locals exist, swaps to them seamlessly
+       * Cycles every 6 seconds
+   - Markdown logic: ONLY tries <slug>.md (unchanged otherwise)
 */
 
 (() => {
   const $ = (sel) => document.querySelector(sel);
 
-  // Extract directory and slug (filename without extension) from current URL
-  const getFileContext = () => {
+  // --- Path helpers ---
+  const getContext = () => {
     const path = location.pathname;
     const dir = path.slice(0, path.lastIndexOf("/") + 1);
     const file = path.slice(path.lastIndexOf("/") + 1);
-    const dot = file.lastIndexOf(".");
-    const nameNoExt = dot >= 0 ? file.slice(0, dot) : file;
-    return { dir, nameNoExt };
+    const slug = file.replace(/\.[^.]+$/, "");
+    return { dir, slug };
   };
 
-  // Probe a single URL by attempting to load it as an Image
-  const probeUrl = (url) =>
+  // --- Image helpers ---
+  const probe = (url) =>
     new Promise((resolve) => {
       const img = new Image();
       img.onload = () => resolve(url);
       img.onerror = () => resolve(null);
       img.decoding = "async";
       img.referrerPolicy = "no-referrer";
-      img.src = url + (url.includes("?") ? "&" : "?") + "ts=" + Date.now(); // bust cache while testing
+      img.src = url + (url.includes("?") ? "&" : "?") + "cb=" + Date.now();
     });
 
-  // For a given suffix, try extensions in order; return the first that exists (or null)
-  const firstExistingForSuffix = async ({ dir, slug, suffix, exts }) => {
-    for (const ext of exts) {
-      const url = `${dir}${slug}${suffix}${ext}`;
-      const ok = await probeUrl(url);
-      if (ok) return ok;
-    }
-    return null;
-  };
-
-  // Build the ordered local image list: slug, slug_2 ... slug_6 (first existing per suffix)
-  const findLocalImages = async ({ dir, slug }) => {
+  const findLocalImages = async (dir, slug) => {
     const suffixes = ["", "_2", "_3", "_4", "_5", "_6"];
     const exts = [".jpg", ".jpeg", ".png", ".webp"];
-    const images = [];
+    const results = [];
     for (const sfx of suffixes) {
-      // eslint-disable-next-line no-await-in-loop
-      const found = await firstExistingForSuffix({ dir, slug, suffix: sfx, exts });
-      if (found) images.push(found);
+      let found = null;
+      for (const ext of exts) {
+        // eslint-disable-next-line no-await-in-loop
+        const ok = await probe(`${dir}${slug}${sfx}${ext}`);
+        if (ok) {
+          found = ok;
+          break;
+        }
+      }
+      if (found) results.push(found);
     }
-    return images;
+    return results;
   };
 
-  // If no locals, create six random Picsum JPEGs
-  const randomFallbacks = (count = 6) => {
-    const seedBase = Date.now();
-    const arr = [];
-    for (let i = 0; i < count; i++) {
-      const seed = `${seedBase}-${i}-${Math.random().toString(36).slice(2, 8)}`;
-      arr.push(`https://picsum.photos/seed/${encodeURIComponent(seed)}/1600/900.jpg`);
-    }
-    return arr;
-  };
-
-  // Start the slideshow
+  // Start a slideshow and return its interval id
   const startSlideshow = (urls, heroEl, captionEl) => {
-    if (!urls || urls.length === 0 || !heroEl) return;
-
+    if (!heroEl || !urls.length) return null;
     let i = 0;
-    const setSrc = () => {
-      // Add a small cache-buster in case external CDNs are sticky
-      heroEl.src = urls[i] + (urls[i].includes("?") ? "&" : "?") + "r=" + Math.random().toString(36).slice(2, 7);
+    const show = () => {
+      const u = urls[i];
+      heroEl.src = u + (u.includes("?") ? "&" : "?") + "r=" + Math.random().toString(36).slice(2, 7);
     };
-
-    setSrc();
-    if (captionEl) {
-      captionEl.textContent = `Image chain slideshow (${urls.length} images, 6s each)`;
-    }
-
-    setInterval(() => {
+    show();
+    if (captionEl) captionEl.textContent = `Image chain slideshow (${urls.length} images, 6s each)`;
+    return setInterval(() => {
       i = (i + 1) % urls.length;
-      setSrc();
+      show();
     }, 6000);
   };
 
+  const FALLBACK = [
+    "https://picsum.photos/seed/pw1/1600/900.jpg",
+    "https://picsum.photos/seed/pw2/1600/900.jpg",
+    "https://picsum.photos/seed/pw3/1600/900.jpg",
+    "https://picsum.photos/seed/pw4/1600/900.jpg",
+    "https://picsum.photos/seed/pw5/1600/900.jpg",
+    "https://picsum.photos/seed/pw6/1600/900.jpg",
+  ];
+
+  // --- Minimal Markdown (ONLY <slug>.md) ---
+  const mdToHtml = (md) => {
+    const esc = md.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+    let html = esc
+      .replace(/^###### (.*)$/gm, "<h6>$1</h6>")
+      .replace(/^##### (.*)$/gm, "<h5>$1</h5>")
+      .replace(/^#### (.*)$/gm, "<h4>$1</h4>")
+      .replace(/^### (.*)$/gm, "<h3>$1</h3>")
+      .replace(/^## (.*)$/gm, "<h2>$1</h2>")
+      .replace(/^# (.*)$/gm, "<h1>$1</h1>")
+      .replace(/\*\*(.+?)\*\*/g, "<strong>$1</strong>")
+      .replace(/\*(.+?)\*/g, "<em>$1</em>")
+      .replace(/`([^`]+?)`/g, "<code>$1</code>")
+      .replace(/\[([^\]]+?)\]\((https?:\/\/[^\s)]+)\)/g, '<a href="$2" target="_blank" rel="noopener noreferrer">$1</a>');
+    html = html
+      .split(/\n{2,}/)
+      .map((chunk) => {
+        if (/^<h\d>/.test(chunk)) return chunk;
+        if (/^\s*[-*] /.test(chunk)) {
+          const items = chunk
+            .split(/\n/)
+            .map((l) => l.replace(/^\s*[-*] /, ""))
+            .map((li) => `<li>${li}</li>`)
+            .join("");
+          return `<ul>${items}</ul>`;
+        }
+        return `<p>${chunk.replace(/\n/g, "<br>")}</p>`;
+      })
+      .join("\n");
+    return html;
+  };
+
   document.addEventListener("DOMContentLoaded", async () => {
-    const { dir, nameNoExt } = getFileContext();
-    const hero = $("#hero-image");
-    const caption = $("#hero-caption");
+    const { dir, slug } = getContext();
 
-    // Try local images first
-    let images = await findLocalImages({ dir, slug: nameNoExt });
+    // --- Images: show fallback immediately, then upgrade if locals exist ---
+    const hero = document.getElementById("hero-image");
+    const caption = document.getElementById("hero-caption");
 
-    // Fallback to random Picsum set if none found
-    if (images.length === 0) {
-      images = randomFallbacks(6);
+    let timer = startSlideshow(FALLBACK, hero, caption);
+
+    const locals = await findLocalImages(dir, slug);
+    if (locals.length) {
+      if (timer) clearInterval(timer);
+      timer = startSlideshow(locals, hero, caption);
     }
 
-    startSlideshow(images, hero, caption);
+    // --- Markdown: ONLY <slug>.md (leave behavior as it was) ---
+    const mdEl = document.getElementById("md-content");
+    if (mdEl) {
+      try {
+        const res = await fetch(`${dir}${slug}.md`, { cache: "no-store" });
+        if (res.ok) {
+          const text = await res.text();
+          if (text && text.trim()) {
+            mdEl.innerHTML = mdToHtml(text);
+          }
+        }
+      } catch {}
+    }
   });
 })();
