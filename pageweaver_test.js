@@ -6,6 +6,7 @@
        * Cycles every 6 seconds
    - Markdown logic: ONLY tries <slug>.md (unchanged otherwise)
    - Video logic: probes for <slug>.mp4 and injects below image in styled box
+     * If not found, loads fallback public video and limits playback to 6 seconds
 */
 
 (() => {
@@ -136,41 +137,56 @@
       } catch {}
     }
 
-    // --- Video: probe for <slug>.mp4 and inject if found ---
+    // --- Video: probe for <slug>.mp4 or fallback to public test video ---
     const videoContainer = document.getElementById("video-container");
     if (videoContainer) {
       const videoUrl = `${dir}${slug}.mp4`;
+      let finalUrl = null;
       try {
         const res = await fetch(videoUrl, { method: "HEAD", cache: "no-store" });
         if (res.ok) {
-          const wrapper = document.createElement("figure");
-          wrapper.className = "pw-figure";
-          wrapper.style.maxWidth = "600px";
-          wrapper.style.margin = "0 auto 18px";
-
-          const videoEl = document.createElement("video");
-          videoEl.src = videoUrl;
-          videoEl.autoplay = true;
-          videoEl.loop = true;
-          videoEl.controls = true;
-          videoEl.style.width = "100%";
-          videoEl.style.border = "1px solid var(--border)";
-          videoEl.style.borderRadius = "6px";
-          videoEl.style.display = "block";
-
-          const caption = document.createElement("figcaption");
-          caption.textContent = "Video loaded by filename convention";
-          caption.style.marginTop = "8px";
-          caption.style.color = "var(--fg-dim)";
-          caption.style.fontSize = ".9rem";
-          caption.style.textAlign = "center";
-          caption.style.opacity = ".85";
-
-          wrapper.appendChild(videoEl);
-          wrapper.appendChild(caption);
-          videoContainer.appendChild(wrapper);
+          finalUrl = videoUrl;
         }
       } catch {}
+
+      if (!finalUrl) {
+        // Fallback public video (6s loop-friendly clip)
+        finalUrl = "https://interactive-examples.mdn.mozilla.net/media/cc0-videos/flower.mp4";
+      }
+
+      const wrapper = document.createElement("figure");
+      wrapper.className = "pw-figure";
+      wrapper.style.maxWidth = "600px";
+      wrapper.style.margin = "0 auto 18px";
+
+      const videoEl = document.createElement("video");
+      videoEl.src = finalUrl;
+      videoEl.autoplay = true;
+      videoEl.loop = true;
+      videoEl.controls = true;
+      videoEl.style.width = "100%";
+      videoEl.style.border = "1px solid var(--border)";
+      videoEl.style.borderRadius = "6px";
+      videoEl.style.display = "block";
+
+      // Limit playback to 6 seconds
+      videoEl.addEventListener("timeupdate", () => {
+        if (videoEl.currentTime >= 6) {
+          videoEl.pause();
+        }
+      });
+
+      const caption = document.createElement("figcaption");
+      caption.textContent = "Video loaded by filename convention";
+      caption.style.marginTop = "8px";
+      caption.style.color = "var(--fg-dim)";
+      caption.style.fontSize = ".9rem";
+      caption.style.textAlign = "center";
+      caption.style.opacity = ".85";
+
+      wrapper.appendChild(videoEl);
+      wrapper.appendChild(caption);
+      videoContainer.appendChild(wrapper);
     }
   });
 })();
