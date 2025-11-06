@@ -8,7 +8,7 @@
    - Video logic: probes for <slug>.mp4 and injects below image in styled box
      * If not found, loads fallback public video and limits playback to 6 seconds
      * Autoplay now works by muting the video
-     * Page title and header set from filename
+     * Page title and header set from filename, with underscores converted to spaces and words capitalized
 */
 
 (() => {
@@ -22,6 +22,14 @@
     const slug = file.replace(/\.[^.]+$/, "");
     return { dir, slug };
   };
+
+  // --- Title formatter ---
+  const formatTitle = (raw) =>
+    raw
+      .replace(/[-_]/g, " ")
+      .split(" ")
+      .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
+      .join(" ");
 
   // --- Image helpers ---
   const probe = (url) =>
@@ -53,7 +61,6 @@
     return results;
   };
 
-  // Start a slideshow and return its interval id
   const startSlideshow = (urls, heroEl, captionEl) => {
     if (!heroEl || !urls.length) return null;
     let i = 0;
@@ -114,7 +121,7 @@
     const { dir, slug } = getContext();
 
     // --- Set page title and header from filename ---
-    const title = slug.replace(/[-_]/g, " ");
+    const title = formatTitle(slug);
     document.title = title;
     const titleEl = document.getElementById("page-title");
     if (titleEl) titleEl.textContent = title;
