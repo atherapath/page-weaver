@@ -16,6 +16,7 @@ body {
   background: var(--bg);
   color: var(--fg);
   font-family: var(--font);
+  
   text-rendering: optimizeLegibility;
 }
 
@@ -73,11 +74,9 @@ body {
   padding: 18px;
   border-radius: 10px;
   font-size: 0.92rem;      /* Makes text a bit smaller */
-  max-height: 80vh;        /* 80% of viewport height */
-  overflow-y: auto;        /* Vertical scroll when needed */
-  scrollbar-width: thin;
-  scrollbar-color: rgba(60, 255, 0, 0.4) rgba(60, 255, 0, 0.02);
-  letter-spacing: 0.01em;  /* Slightly tighter text */
+  max-height: 80vh;     /* Adjust as desired for visible space, e.g. 80% of viewport height */
+  overflow-y: auto;     /* Show vertical scroll when needed */
+  letter-spacing: 0.01em;  /* Less space between letters, or use -0.01em for even tighter */
 }
 .pw-article h1, .pw-article h2, .pw-article h3 {
   color: var(--accent);
@@ -107,22 +106,6 @@ code, pre {
 }
 pre { padding: .6rem .8rem; overflow-x: auto; }
 
-.pw-intro,
-.pw-closer {
-  grid-column: 1 / -1;
-  background: #eaf8e5;
-  border: 2px solid #009e47;
-  border-radius: 1.5rem;
-  padding: 1.5rem;
-  margin: 2rem 0;
-  box-shadow: 0 0 10px rgba(0, 158, 71, 0.2);
-}
-
-.pw-intro p,
-.pw-closer p {
-  margin: 0.5rem 0;
-}
-
 /* ===== Subtle CRT scanline vibe ===== */
 body:before {
   content: "";
@@ -148,52 +131,6 @@ body:before {
     gap: 24px;
     align-items: start;
   }
-
-  /* Explicit column pinning so video sits UNDER the image */
-  .pw-figure { grid-column: 1; }
-  .pw-video  { grid-column: 1; } /* NEW: ensures video stacks below image */
-  .pw-article{ grid-column: 2; }
-}
-
-/* Scrollbar (WebKit) */
-.pw-article::-webkit-scrollbar { width: 8px; }
-.pw-article::-webkit-scrollbar-track { background: rgba(60, 255, 0, 0.02); }
-.pw-article::-webkit-scrollbar-thumb {
-  background-color: rgba(60, 255, 0, 0.4);
-  border-radius: 4px;
-  border: 1px solid var(--border);
-}
-
-/* === Page-Weaver: video module === */
-:root{
-  /* Keep these only if you DON'T already define them elsewhere */
-  --pw-gutter: 1rem;
-  --pw-radius: 12px;
-  --pw-accent-green: #00a86b; /* match your scrollbar green */
-}
-
-.pw-video {
-  border: 2px solid var(--pw-accent-green);
-  border-radius: var(--pw-radius);
-  padding: calc(var(--pw-gutter) * 0.8);
-  margin-top: calc(var(--pw-gutter) * 1);
-
-  /* Fallback first, then color-mix for modern browsers */
-  background: rgba(60,255,0,.03);
-  background: color-mix(in srgb, var(--pw-accent-green) 6%, transparent);
-
-  scrollbar-gutter: stable;
-}
-
-.pw-video > video {
-  display: block;
-  width: 100%;
-  height: auto;
-  aspect-ratio: 16 / 9; /* adjust if your clip is taller/squarer */
-  object-fit: cover;
-  border-radius: calc(var(--pw-radius) - 4px);
-}
-
-@media (prefers-reduced-motion: reduce) {
-  .pw-video > video { animation: none !important; }
+  .pw-figure { order: 1; }
+  .pw-article { order: 2; }
 }
