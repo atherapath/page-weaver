@@ -8,6 +8,7 @@
    - Video logic: probes for <slug>.mp4 and injects below image in styled box
      * If not found, loads fallback public video and limits playback to 6 seconds
      * Autoplay now works by muting the video
+     * Page title and header set from filename
 */
 
 (() => {
@@ -111,6 +112,12 @@
 
   document.addEventListener("DOMContentLoaded", async () => {
     const { dir, slug } = getContext();
+
+    // --- Set page title and header from filename ---
+    const title = slug.replace(/[-_]/g, " ");
+    document.title = title;
+    const titleEl = document.getElementById("page-title");
+    if (titleEl) titleEl.textContent = title;
 
     // --- Images: show fallback immediately, then upgrade if locals exist ---
     const hero = document.getElementById("hero-image");
