@@ -166,6 +166,29 @@ if (bannerEl) {
   } catch {}
 }
 
+// --- Bottom Banner Markdown: <slug>_bottom.md ---
+// 1) Try to load <slug>_bottom.md
+// 2) If not found/empty, mirror the top banner content
+const bottomEl = document.getElementById("bottom-banner");
+if (bottomEl) {
+  let filled = false;
+  try {
+    const res = await fetch(`${dir}${slug}_bottom.md`, { cache: "no-store" });
+    if (res.ok) {
+      const text = await res.text();
+      if (text && text.trim()) {
+        bottomEl.innerHTML = mdToHtml(text);
+        filled = true;
+      }
+    }
+  } catch {}
+
+  // Fallback: copy top banner content if bottom is missing/empty
+  if (!filled && bannerEl && bannerEl.innerHTML && bannerEl.innerHTML.trim()) {
+    bottomEl.innerHTML = bannerEl.innerHTML;
+  }
+}
+
     // --- Video: probe for <slug>.mp4 or fallback to public test video ---
     const videoContainer = document.getElementById("video-container");
     if (videoContainer) {
