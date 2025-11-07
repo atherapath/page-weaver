@@ -166,20 +166,6 @@ if (bannerEl) {
   } catch {}
 }
 
-// --- Bottom Banner Markdown: <slug>_bottom.md ---
-const bot-bannerEl = document.getElementById("bottom-banner");
-if (bot-bannerEl) {
-  try {
-    const res = await fetch(`${dir}${slug}_bottom.md`, { cache: "no-store" });
-    if (res.ok) {
-      const text = await res.text();
-      if (text && text.trim()) {
-        bot-bannerEl.innerHTML = mdToHtml(text);
-      }
-    }
-  } catch {}
-}
-
     // --- Video: probe for <slug>.mp4 or fallback to public test video ---
     const videoContainer = document.getElementById("video-container");
     if (videoContainer) {
