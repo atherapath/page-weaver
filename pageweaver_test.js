@@ -1,12 +1,9 @@
-/* pageweaver_test.js
-   AtheraPath – PageWeaver minimal loader
-   Version: no fallbacks, symmetrical top/bottom banner loading
-*/
+/* AtheraPath – PageWeaver (clean symmetric banners, no fallback) */
 
 (() => {
+  // ---------- tiny utils ----------
   const $ = (sel) => document.querySelector(sel);
 
-  // --- Path helpers ---
   const getContext = () => {
     const path = location.pathname;
     const dir = path.slice(0, path.lastIndexOf("/") + 1);
@@ -15,63 +12,12 @@
     return { dir, slug };
   };
 
-  // --- Title formatter ---
   const formatTitle = (raw) =>
-    raw
-      .replace(/[-_]/g, " ")
-      .split(" ")
-      .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
-      .join(" ");
+    raw.replace(/[-_]/g, " ")
+       .split(" ")
+       .map((w) => w.charAt(0).toUpperCase() + w.slice(1))
+       .join(" ");
 
-  // --- Image helpers ---
-  const probe = (url) =>
-    new Promise((resolve) => {
-      const img = new Image();
-      img.onload = () => resolve(url);
-      img.onerror = () => resolve(null);
-      img.decoding = "async";
-      img.referrerPolicy = "no-referrer";
-      img.src = url + (url.includes("?") ? "&" : "?") + "cb=" + Date.now();
-    });
-
-  const findLocalImages = async (dir, slug) => {
-    const suffixes = ["", "_2", "_3", "_4", "_5", "_6"];
-    const exts = [".jpg", ".jpeg", ".png", ".webp"];
-    const results = [];
-    for (const sfx of suffixes) {
-      for (const ext of exts) {
-        const ok = await probe(`${dir}${slug}${sfx}${ext}`);
-        if (ok) results.push(ok);
-      }
-    }
-    return results;
-  };
-
-  const startSlideshow = (urls, heroEl, captionEl) => {
-    if (!heroEl || !urls.length) return null;
-    let i = 0;
-    const show = () => {
-      const u = urls[i];
-      heroEl.src = u + (u.includes("?") ? "&" : "?") + "r=" + Math.random().toString(36).slice(2, 7);
-    };
-    show();
-    if (captionEl) captionEl.textContent = `Image chain slideshow (${urls.length} images, 6s each)`;
-    return setInterval(() => {
-      i = (i + 1) % urls.length;
-      show();
-    }, 6000);
-  };
-
-  const FALLBACK = [
-    "https://picsum.photos/seed/pw1/1600/900.jpg",
-    "https://picsum.photos/seed/pw2/1600/900.jpg",
-    "https://picsum.photos/seed/pw3/1600/900.jpg",
-    "https://picsum.photos/seed/pw4/1600/900.jpg",
-    "https://picsum.photos/seed/pw5/1600/900.jpg",
-    "https://picsum.photos/seed/pw6/1600/900.jpg",
-  ];
-
-  // --- Markdown converter ---
   const mdToHtml = (md) => {
     const esc = md.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
     let html = esc
@@ -103,31 +49,78 @@
     return html;
   };
 
-  // --- DOMContentLoaded main ---
+  const probeImage = (url) =>
+    new Promise((resolve) => {
+      const img = new Image();
+      img.onload = () => resolve(url);
+      img.onerror = () => resolve(null);
+      img.decoding = "async";
+      img.referrerPolicy = "no-referrer";
+      img.src = url + (url.includes("?") ? "&" : "?") + "cb=" + Date.now();
+    });
+
+  const findLocalImages = async (dir, slug) => {
+    const suffixes = ["", "_2", "_3", "_4", "_5", "_6"];
+    const exts = [".jpg", ".jpeg", ".png", ".webp"];
+    const results = [];
+    for (const sfx of suffixes) {
+      for (const ext of exts) {
+        const ok = await probeImage(`${dir}${slug}${sfx}${ext}`);
+        if (ok) results.push(ok);
+      }
+    }
+    return results;
+  };
+
+  const startSlideshow = (urls, heroEl, captionEl) => {
+    if (!heroEl || !urls.length) return null;
+    let i = 0;
+    const show = () => {
+      const u = urls[i];
+      heroEl.src = u + (u.includes("?") ? "&" : "?") + "r=" + Math.random().toString(36).slice(2, 7);
+    };
+    show();
+    if (captionEl) captionEl.textContent = `Image chain slideshow (${urls.length} images, 6s each)`;
+    return setInterval(() => {
+      i = (i + 1) % urls.length;
+      show();
+    }, 6000);
+  };
+
+  const FALLBACK_IMAGES = [
+    "https://picsum.photos/seed/pw1/1600/900.jpg",
+    "https://picsum.photos/seed/pw2/1600/900.jpg",
+    "https://picsum.photos/seed/pw3/1600/900.jpg",
+    "https://picsum.photos/seed/pw4/1600/900.jpg",
+    "https://picsum.photos/seed/pw5/1600/900.jpg",
+    "https://picsum.photos/seed/pw6/1600/900.jpg",
+  ];
+
+  // ---------- main ----------
   document.addEventListener("DOMContentLoaded", async () => {
     const { dir, slug } = getContext();
 
-    // --- Title ---
+    // Title
     const title = formatTitle(slug);
     document.title = title;
-    const titleEl = document.getElementById("page-title");
+    const titleEl = $("#page-title");
     if (titleEl) titleEl.textContent = title;
 
-    // --- Images ---
-    const hero = document.getElementById("hero-image");
-    const caption = document.getElementById("hero-caption");
-    let timer = startSlideshow(FALLBACK, hero, caption);
+    // Hero slideshow
+    const hero = $("#hero-image");
+    const caption = $("#hero-caption");
+    let timer = startSlideshow(FALLBACK_IMAGES, hero, caption);
     const locals = await findLocalImages(dir, slug);
     if (locals.length) {
       if (timer) clearInterval(timer);
       timer = startSlideshow(locals, hero, caption);
     }
 
-    // --- Markdown content ---
-    const mdEl = document.getElementById("md-content");
+    // Main markdown
+    const mdEl = $("#md-content");
     if (mdEl) {
       try {
-        const res = await fetch(`${dir}${slug}.md`, { cache: "no-store" });
+        const res = await fetch(`${dir}${slug}.md?cb=${Date.now()}`, { cache: "no-store" });
         if (res.ok) {
           const text = await res.text();
           if (text && text.trim()) mdEl.innerHTML = mdToHtml(text);
@@ -135,12 +128,12 @@
       } catch {}
     }
 
-    // --- Top Banner ---
+    // Top banner (exactly as requested)
     {
-      const el = document.getElementById("top-banner");
+      const el = $("#top-banner");
       if (el) {
         try {
-          const res = await fetch(`${dir}${slug}_top.md`, { cache: "no-store" });
+          const res = await fetch(`${dir}${slug}_top.md?cb=${Date.now()}`, { cache: "no-store" });
           if (res.ok) {
             const text = await res.text();
             if (text && text.trim()) el.innerHTML = mdToHtml(text);
@@ -149,12 +142,12 @@
       }
     }
 
-    // --- Bottom Banner ---
+    // Bottom banner (identical to top, just _bottom)
     {
-      const el = document.getElementById("bottom-banner");
+      const el = $("#bottom-banner");
       if (el) {
         try {
-          const res = await fetch(`${dir}${slug}_bottom.md`, { cache: "no-store" });
+          const res = await fetch(`${dir}${slug}_bottom.md?cb=${Date.now()}`, { cache: "no-store" });
           if (res.ok) {
             const text = await res.text();
             if (text && text.trim()) el.innerHTML = mdToHtml(text);
@@ -163,14 +156,14 @@
       }
     }
 
-    // --- Video ---
-    const videoContainer = document.getElementById("video-container");
+    // Optional video block
+    const videoContainer = $("#video-container");
     if (videoContainer) {
       const videoUrl = `${dir}${slug}.mp4`;
       let finalUrl = null;
       try {
-        const res = await fetch(videoUrl, { method: "HEAD", cache: "no-store" });
-        if (res.ok) finalUrl = videoUrl;
+        const head = await fetch(videoUrl, { method: "HEAD", cache: "no-store" });
+        if (head.ok) finalUrl = videoUrl;
       } catch {}
       if (!finalUrl) finalUrl = "https://interactive-examples.mdn.mozilla.net/media/cc0-videos/flower.mp4";
 
