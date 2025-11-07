@@ -1,14 +1,6 @@
 /* pageweaver_test.js
-   - Slideshow only change:
-       * Shows fallback Picsum images immediately (no initial blank)
-       * Probes for local images: <slug>.(jpg|jpeg|png|webp) and <slug>_2.._6.*
-       * If locals exist, swaps to them seamlessly
-       * Cycles every 6 seconds
-   - Markdown logic: ONLY tries <slug>.md (unchanged otherwise)
-   - Video logic: probes for <slug>.mp4 and injects below image in styled box
-     * If not found, loads fallback public video and limits playback to 6 seconds
-     * Autoplay now works by muting the video
-     * Page title and header set from filename, with underscores converted to spaces and words capitalized
+   AtheraPath – PageWeaver minimal loader
+   Version: no fallbacks, symmetrical top/bottom banner loading
 */
 
 (() => {
@@ -47,16 +39,10 @@
     const exts = [".jpg", ".jpeg", ".png", ".webp"];
     const results = [];
     for (const sfx of suffixes) {
-      let found = null;
       for (const ext of exts) {
-        // eslint-disable-next-line no-await-in-loop
         const ok = await probe(`${dir}${slug}${sfx}${ext}`);
-        if (ok) {
-          found = ok;
-          break;
-        }
+        if (ok) results.push(ok);
       }
-      if (found) results.push(found);
     }
     return results;
   };
@@ -85,7 +71,7 @@
     "https://picsum.photos/seed/pw6/1600/900.jpg",
   ];
 
-  // --- Minimal Markdown (ONLY <slug>.md) ---
+  // --- Markdown converter ---
   const mdToHtml = (md) => {
     const esc = md.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
     let html = esc
@@ -117,93 +103,76 @@
     return html;
   };
 
+  // --- DOMContentLoaded main ---
   document.addEventListener("DOMContentLoaded", async () => {
     const { dir, slug } = getContext();
 
-    // --- Set page title and header from filename ---
+    // --- Title ---
     const title = formatTitle(slug);
     document.title = title;
     const titleEl = document.getElementById("page-title");
     if (titleEl) titleEl.textContent = title;
 
-    // --- Images: show fallback immediately, then upgrade if locals exist ---
+    // --- Images ---
     const hero = document.getElementById("hero-image");
     const caption = document.getElementById("hero-caption");
-
     let timer = startSlideshow(FALLBACK, hero, caption);
-
     const locals = await findLocalImages(dir, slug);
     if (locals.length) {
       if (timer) clearInterval(timer);
       timer = startSlideshow(locals, hero, caption);
     }
 
-    // --- Markdown: ONLY <slug>.md ---
+    // --- Markdown content ---
     const mdEl = document.getElementById("md-content");
     if (mdEl) {
       try {
         const res = await fetch(`${dir}${slug}.md`, { cache: "no-store" });
         if (res.ok) {
           const text = await res.text();
-          if (text && text.trim()) {
-            mdEl.innerHTML = mdToHtml(text);
-          }
+          if (text && text.trim()) mdEl.innerHTML = mdToHtml(text);
         }
       } catch {}
     }
 
-// --- Top Banner Markdown: <slug>_top.md ---
-const bannerEl = document.getElementById("top-banner");
-if (bannerEl) {
-  try {
-    const res = await fetch(`${dir}${slug}_top.md`, { cache: "no-store" });
-    if (res.ok) {
-      const text = await res.text();
-      if (text && text.trim()) {
-        bannerEl.innerHTML = mdToHtml(text);
+    // --- Top Banner ---
+    {
+      const el = document.getElementById("top-banner");
+      if (el) {
+        try {
+          const res = await fetch(`${dir}${slug}_top.md`, { cache: "no-store" });
+          if (res.ok) {
+            const text = await res.text();
+            if (text && text.trim()) el.innerHTML = mdToHtml(text);
+          }
+        } catch {}
       }
     }
-  } catch {}
-}
 
-// --- Bottom Banner Markdown: <slug>_bottom.md ---
-{
-  const { dir, slug } = getContext();
-  const el = document.getElementById("bottom-banner");
-  if (el) {
-    try {
-      const res = await fetch(`${dir}${slug}_bottom.md`, { cache: "no-store" });
-      if (res.ok) {
-        const text = await res.text();
-        if (text && text.trim()) {
-          el.innerHTML = mdToHtml(text);
-        }
+    // --- Bottom Banner ---
+    {
+      const el = document.getElementById("bottom-banner");
+      if (el) {
+        try {
+          const res = await fetch(`${dir}${slug}_bottom.md`, { cache: "no-store" });
+          if (res.ok) {
+            const text = await res.text();
+            if (text && text.trim()) el.innerHTML = mdToHtml(text);
+          }
+        } catch {}
       }
-    } catch {}
-  }
-}
+    }
 
-  // Fallback: copy top banner content if bottom is missing/empty
-  if (!filled && bannerEl && bannerEl.innerHTML && bannerEl.innerHTML.trim()) {
-    bottomEl.innerHTML = bannerEl.innerHTML;
-  }
-}
-
-    // --- Video: probe for <slug>.mp4 or fallback to public test video ---
+    // --- Video ---
     const videoContainer = document.getElementById("video-container");
     if (videoContainer) {
       const videoUrl = `${dir}${slug}.mp4`;
       let finalUrl = null;
       try {
         const res = await fetch(videoUrl, { method: "HEAD", cache: "no-store" });
-        if (res.ok) {
-          finalUrl = videoUrl;
-        }
+        if (res.ok) finalUrl = videoUrl;
       } catch {}
-
-      if (!finalUrl) {
-        finalUrl = "https://interactive-examples.mdn.mozilla.net/media/cc0-videos/flower.mp4";
-      }
+      if (!finalUrl) finalUrl = "https://interactive-examples.mdn.mozilla.net/media/cc0-videos/flower.mp4";
 
       const wrapper = document.createElement("figure");
       wrapper.className = "pw-figure";
@@ -220,23 +189,20 @@ if (bannerEl) {
       videoEl.style.border = "1px solid var(--border)";
       videoEl.style.borderRadius = "6px";
       videoEl.style.display = "block";
-
       videoEl.addEventListener("timeupdate", () => {
-        if (videoEl.currentTime >= 6) {
-          videoEl.pause();
-        }
+        if (videoEl.currentTime >= 6) videoEl.pause();
       });
 
-      const caption = document.createElement("figcaption");
-      caption.textContent = "Video loaded by filename convention";
-      caption.style.marginTop = "8px";
-      caption.style.color = "var(--fg-dim)";
-      caption.style.fontSize = ".9rem";
-      caption.style.textAlign = "center";
-      caption.style.opacity = ".85";
+      const cap = document.createElement("figcaption");
+      cap.textContent = "Video loaded by filename convention";
+      cap.style.marginTop = "8px";
+      cap.style.color = "var(--fg-dim)";
+      cap.style.fontSize = ".9rem";
+      cap.style.textAlign = "center";
+      cap.style.opacity = ".85";
 
       wrapper.appendChild(videoEl);
-      wrapper.appendChild(caption);
+      wrapper.appendChild(cap);
       videoContainer.appendChild(wrapper);
     }
   });
