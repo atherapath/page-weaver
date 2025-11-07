@@ -185,16 +185,3 @@ body:before {
   font-size: 0.95rem;
   color: var(--fg);
 }
-
-/* ===== Bottom Banner Section ===== */
-.pw-bot-banner {
-  grid-column: 1 / -1; /* spans both columns */
-  border: 1px solid var(--border);
-  background: rgba(60,255,0,.03);
-  padding: 14px 18px;
-  border-radius: 10px;
-  margin-bottom: 20px;
-  font-size: 0.95rem;
-  color: var(--fg);
-}
-
