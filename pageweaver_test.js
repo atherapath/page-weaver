@@ -106,15 +106,37 @@
     const titleEl = $("#page-title");
     if (titleEl) titleEl.textContent = title;
 
-    // Hero slideshow
-    const hero = $("#hero-image");
-    const caption = $("#hero-caption");
-    let timer = startSlideshow(FALLBACK_IMAGES, hero, caption);
-    const locals = await findLocalImages(dir, slug);
-    if (locals.length) {
-      if (timer) clearInterval(timer);
-      timer = startSlideshow(locals, hero, caption);
-    }
+    // --- Images (no flash of fallback) ---
+const hero = document.getElementById("hero-image");
+const caption = document.getElementById("hero-caption");
+
+// Hide image until we know the real source
+if (hero) hero.style.visibility = "hidden";
+
+const locals = await findLocalImages(dir, slug);
+
+const start = (urls) => {
+  if (!urls || !urls.length || !hero) return;
+  let i = 0;
+  const show = () => {
+    const u = urls[i];
+    hero.onload = () => { hero.style.visibility = "visible"; };
+    hero.src = u + (u.includes("?") ? "&" : "?") + "r=" + Math.random().toString(36).slice(2,7);
+  };
+  show();
+  if (caption) caption.textContent = `Image chain slideshow (${urls.length} images, 6s each)`;
+  return setInterval(() => { i = (i + 1) % urls.length; show(); }, 6000);
+};
+
+let timer = null;
+
+// Prefer locals; only use fallback if none
+if (locals && locals.length) {
+  timer = start(locals);
+} else {
+  // last resort
+  timer = start(FALLBACK_IMAGES);
+}
 
     // Main markdown
     const mdEl = $("#md-content");
