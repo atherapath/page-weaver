@@ -185,3 +185,5 @@ body:before {
   font-size: 0.95rem;
   color: var(--fg);
 }
+
+#bottom-banner { margin-top: 20px; }
