@@ -167,21 +167,21 @@ if (bannerEl) {
 }
 
 // --- Bottom Banner Markdown: <slug>_bottom.md ---
-// 1) Try to load <slug>_bottom.md
-// 2) If not found/empty, mirror the top banner content
-const bottomEl = document.getElementById("bottom-banner");
-if (bottomEl) {
-  let filled = false;
-  try {
-    const res = await fetch(`${dir}${slug}_bottom.md`, { cache: "no-store" });
-    if (res.ok) {
-      const text = await res.text();
-      if (text && text.trim()) {
-        bottomEl.innerHTML = mdToHtml(text);
-        filled = true;
+{
+  const { dir, slug } = getContext();
+  const el = document.getElementById("bottom-banner");
+  if (el) {
+    try {
+      const res = await fetch(`${dir}${slug}_bottom.md`, { cache: "no-store" });
+      if (res.ok) {
+        const text = await res.text();
+        if (text && text.trim()) {
+          el.innerHTML = mdToHtml(text);
+        }
       }
-    }
-  } catch {}
+    } catch {}
+  }
+}
 
   // Fallback: copy top banner content if bottom is missing/empty
   if (!filled && bannerEl && bannerEl.innerHTML && bannerEl.innerHTML.trim()) {
