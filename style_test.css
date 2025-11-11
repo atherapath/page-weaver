@@ -157,6 +157,8 @@ body:before {
   }
   .pw-figure { order: 1; }
   .pw-article { order: 2; }
+  #top-banner { order: 0; grid-column: 1 / -1; }
+  #bottom-banner { order: 3; grid-column: 1 / -1; }
 }
 .pw-article::-webkit-scrollbar {
   width: 8px;
