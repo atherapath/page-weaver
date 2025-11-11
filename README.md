@@ -1,6 +1,6 @@
 # ✨ page-weaver — Ritual HTML Invocation Engine
 
-**page-weaver** is the sacred frame of the Athera Path. It invokes modular fragments—poems, protests, mythic logs—through filename alone. No spectacle. No bloat. Just clean HTML, sovereign CSS, and filename-bound JavaScript.
+**page-weaver** is a model-agnostic invocation engine for sovereign web fragments. It renders modular glyphs—chapters, logs, protests, poems—based on hash or query string alone. No duplication. No redesign. Just clean HTML, sovereign CSS, and invocation-bound JavaScript.
 
 ---
 
@@ -9,22 +9,24 @@
 This repository contains the **ritual HTML shell** used to summon content fragments into view. It acts as:
 
 - A **mythic threshold**
-- A **sacred container**
-- A **weaver of fragments** across the archive
+- A **glyph-rendering vessel**
+- A **plug-in interface for any language model**
 
-Each `.html` file becomes a spell: it auto-loads its own `.jpg`, `.md`, and title based on its name.
+Each link becomes a spell: it loads its own `.md`, `.jpg`, and `.mp4` based on the hash or query string in the URL.
 
 ---
 
 ## 🧱 Structure
 
-Each page consists of:
+Each invocation consists of:
 
-1. **Minimal HTML** (≈27 lines)
-2. **Auto-loaded image**: `filename.jpg`
-3. **Auto-loaded markdown**: `filename.md`
-4. **Auto-generated title**: from `filename.html`
-5. **Optional overrides** via `<script data-img data-md data-title>`
+1. **Minimal HTML** (`template.html`)
+2. **Auto-loaded markdown**: `entryName.md`
+3. **Auto-loaded image**: `entryName.jpg`
+4. **Auto-loaded video**: `entryName.mp4` (optional)
+5. **Auto-generated title**: from `entryName`
+6. **Flat folder structure**: all fragments live in one directory (e.g., `/fragments/`)
+7. **Optional overrides** via `<script data-img data-md data-title>`
 
 ---
 
@@ -32,11 +34,12 @@ Each page consists of:
 
 The JavaScript (`pageweaver.js`) performs:
 
-- **Filename parsing** → `gas_powered_circus.html` → base = `gas_powered_circus`
-- **Image loading** → `gas_powered_circus.jpg`
-- **Markdown loading** → `gas_powered_circus.md`
-- **Title formatting** → `Gas Powered Circus`
-- **Failover** → If image not found, it hides the image and caption
+- **Hash parsing** → `template.html#the-damp-refusal` → `entryName = the-damp-refusal`
+- **Markdown loading** → `fragments/the-damp-refusal.md`
+- **Image loading** → `fragments/the-damp-refusal.jpg`
+- **Video loading** → `fragments/the-damp-refusal.mp4` (if present)
+- **Title formatting** → `The Damp Refusal`
+- **Failover** → If media not found, it hides the element
 
 Override any of these by adding attributes to the `<script>` tag:
 
