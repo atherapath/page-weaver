@@ -6,9 +6,10 @@ document.addEventListener("DOMContentLoaded", () => {
   const mdBlock = document.getElementById("markdown-block");
   const mediaBlock = document.getElementById("media-block");
 
-  const mdPath = `fragments/${entryName}.md`;
-  const imgPath = `fragments/${entryName}.jpg`;
-  const videoPath = `fragments/${entryName}.mp4`;
+  const basePath = "glyphs"; // 🔁 updated folder name
+  const mdPath = `${basePath}/${entryName}.md`;
+  const imgPath = `${basePath}/${entryName}.jpg`;
+  const videoPath = `${basePath}/${entryName}.mp4`;
 
   const titleText = formatTitle(entryName);
   document.title = titleText;
@@ -21,7 +22,7 @@ document.addEventListener("DOMContentLoaded", () => {
       mdBlock.textContent = text;
     })
     .catch(() => {
-      mdBlock.textContent = "⚠️ Markdown fragment not found.";
+      mdBlock.textContent = "⚠️ Markdown glyph not found.";
     });
 
   // Load image
@@ -29,7 +30,7 @@ document.addEventListener("DOMContentLoaded", () => {
   img.src = imgPath;
   img.alt = titleText;
   img.onload = () => mediaBlock.appendChild(img);
-  img.onerror = () => console.warn("⚠️ Image not found");
+  img.onerror = () => console.warn("⚠️ Image glyph not found");
 
   // Load video (optional)
   fetch(videoPath, { method: "HEAD" })
@@ -41,7 +42,7 @@ document.addEventListener("DOMContentLoaded", () => {
         mediaBlock.appendChild(video);
       }
     })
-    .catch(() => console.warn("⚠️ Video not found"));
+    .catch(() => console.warn("⚠️ Video glyph not found"));
 });
 
 function formatTitle(name) {
