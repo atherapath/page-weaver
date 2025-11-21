@@ -20,13 +20,12 @@ Each link becomes a spell: it loads its own `.md`, `.jpg`, and `.mp4` based on t
 
 Each invocation consists of:
 
-1. **Minimal HTML** (`template.html`)
+1. **Minimal HTML** (`glyph.html`)
 2. **Auto-loaded markdown**: `entryName.md`
 3. **Auto-loaded image**: `entryName.jpg`
 4. **Auto-loaded video**: `entryName.mp4` (optional)
 5. **Auto-generated title**: from `entryName`
-6. **Flat folder structure**: all fragments live in one directory (e.g., `/fragments/`)
-7. **Optional overrides** via `<script data-img data-md data-title>`
+6. **Optional overrides** via `<script data-img data-md data-title>`
 
 ---
 
